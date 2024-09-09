@@ -3,6 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 mod startup;
 mod player;
+mod physics;
 
 use startup::setup;
 use crate::player::{react_to_player_changing, reader, PlayerPlugin};

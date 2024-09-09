@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use crate::physics::PhysicsBundle;
+
 
 //player system, the parameters probably don't go here
-#[derive(Default, Debug, Component)]
+#[derive(Default, Component)]
 pub(crate) struct Player {
     //pub facing_right: bool,
     //pub movement_speed: Velocity,
@@ -16,18 +18,16 @@ pub const PLAYER_SPEED_MULTIPLIER: i8 = 100; //maybe take this value from player
 //playerbundle: creates player object and assigns sprite, todo add more components(?), implement physics
 #[derive(Default, Bundle, LdtkEntity)]
 pub(crate) struct PlayerBundle {
-     #[sprite_sheet_bundle]
+    #[sprite_sheet_bundle]
     sprite_sheet_bundle: LdtkSpriteSheetBundle,
 
     player: Player,
 
-    //velocity: Velocity,
-    //physics: PhysicsBundle,
+    physics: PhysicsBundle,
 
     #[worldly]
     worldly: Worldly, //this sets player to worldly status, meaning it persists through levels and is a child of the world itself
 }
-
 
 //movement system, updates player velocity but needs physics system to be finished to work properly
 // pub fn player_movement(
@@ -75,7 +75,6 @@ pub(crate) fn react_to_player_changing(
     }
 }
 
-
 //this can turn velocity into transform manually/modify it(?)
 // pub(crate) fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
 //     for (mut transform, velocity) in &mut query {
@@ -83,7 +82,6 @@ pub(crate) fn react_to_player_changing(
 //         transform.translation.y += velocity.y * time.delta_seconds();
 //     }
 // }
-
 
 //player plugin to register player and add movement system
 pub struct PlayerPlugin;
