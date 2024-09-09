@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 mod startup;
 mod player;
@@ -13,6 +14,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins,
             LdtkPlugin,
+            RapierPhysicsPlugin::<()>::default(),
         ))
 
         .add_systems(Startup, setup)
@@ -22,7 +24,7 @@ fn main() {
         .add_plugins(PlayerPlugin)
 
         //player tests:
-        .add_systems(Update, player::reader)
+        //.add_systems(Update, player::reader)
         //.add_systems(Update, player::react_to_player_changing)
 
         .run();
