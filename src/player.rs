@@ -12,6 +12,7 @@ pub struct Player {
     //pub movement_speed: Velocity,
     //pub player_colliding: bool,
     //pub jump_force: f32,
+    pub jumped: bool
 }
 
 pub const PLAYER_SPEED_MULTIPLIER: i8 = 100; //maybe take this value from player movespeed component
@@ -48,6 +49,14 @@ pub fn player_movement(
         let x_input = -(left as i8) + right as i8;
 
         velocity.linvel.x = (x_input * PLAYER_SPEED_MULTIPLIER) as f32;
+
+        //Jumping
+        if input.just_pressed(KeyCode::Space) && (!player.jumped) {
+            velocity.linvel.y = 400.;
+            //player.jumped = true;
+            //as of now player is able to jump midair infinitely
+            //need to implement a way to turn player.jumped to false when touching the ground
+        }
 
         //system to turn the player towards the direction of movement(needs more implementation)
         // if right {
