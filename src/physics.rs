@@ -36,20 +36,19 @@ impl From<&EntityInstance> for PhysicsBundle {
     }
 }
 
-//sensor system (occurs when objects overlap, or works to prevent objects from overlapping)
-#[derive(Default, Bundle)]
-pub struct SensorBundle {
-    pub collider: Collider,
-    pub sensor: Sensor,
-    pub active_events: ActiveEvents,
-    pub rotation_constraints: LockedAxes,
-}
-
-impl From<IntGridCell> for SensorBundle {
-    fn from(int_grid_cell: IntGridCell) -> SensorBundle {
-        let rotation_constraints = LockedAxes::ROTATION_LOCKED;
-
-        SensorBundle::default()
-    }
-}
-
+//sensor system (occurs when objects overlap, could use later)
+// #[derive(Default, Bundle)]
+// pub struct SensorBundle {
+//     pub collider: Collider,
+//     pub sensor: Sensor,
+//     pub active_events: ActiveEvents,
+//     pub rotation_constraints: LockedAxes,
+// }
+//
+// impl From<IntGridCell> for SensorBundle {
+//     fn from(int_grid_cell: IntGridCell) -> SensorBundle {
+//         let rotation_constraints = LockedAxes::ROTATION_LOCKED;
+//
+//         SensorBundle::default()
+//     }
+// }
