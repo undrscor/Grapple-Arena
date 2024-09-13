@@ -1,33 +1,39 @@
+use crate::physics::PhysicsBundle;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
-use crate::physics::PhysicsBundle;
 
 
-//player system, the parameters probably don't go here
-#[derive(Default, Debug, Component)]
-pub(crate) struct Player {
+//player system, the parameters probably don't go here, need to figure out if they go in the bundle
+// #[derive(Default, Debug, Component)]
+#[derive(Copy, Clone, Eq, PartialEq,Default, Debug, Component)]
+pub struct Player {
     //pub facing_right: bool,
     //pub movement_speed: Velocity,
-    // pub player_colliding: bool,
-    // pub jump_force: f32,
+    //pub player_colliding: bool,
+    //pub jump_force: f32,
 }
 
 pub const PLAYER_SPEED_MULTIPLIER: i8 = 100; //maybe take this value from player movespeed component
 
-
 //playerbundle: creates player object and assigns sprite, todo add more components(?), implement physics
-#[derive(Default, Bundle, LdtkEntity)]
-pub(crate) struct PlayerBundle {
+#[derive(Clone, Default, Bundle, LdtkEntity)]
+pub struct PlayerBundle {
     #[sprite_sheet_bundle]
     sprite_sheet_bundle: LdtkSpriteSheetBundle,
 
-    player: Player,
-
+    #[from_entity_instance]
     physics: PhysicsBundle,
+
+    player: Player,
 
     #[worldly]
     worldly: Worldly, //this sets player to worldly status, meaning it persists through levels and is a child of the world itself
+
+    // The whole EntityInstance can be stored directly as an EntityInstance component
+    // #[from_entity_instance]
+    // entity_instance: EntityInstance,
+
 }
 
 //movement system, updates player velocity but needs physics system to be finished to work properly
@@ -41,10 +47,9 @@ pub fn player_movement(
         let right = input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight);
         let x_input = -(left as i8) + right as i8;
 
-
         velocity.linvel.x = (x_input * PLAYER_SPEED_MULTIPLIER) as f32;
 
-        //system to turn the player towards the direction of movement
+        //system to turn the player towards the direction of movement(needs more implementation)
         // if right {
         //     player.facing_right = true;
         //     //print!("{velocity:?}");
@@ -93,7 +98,3 @@ impl Plugin for PlayerPlugin {
             .register_ldtk_entity::<PlayerBundle>("Player");
     }
 }
-
-
-
-

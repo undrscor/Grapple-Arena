@@ -5,6 +5,7 @@ use bevy_rapier2d::prelude::*;
 mod startup;
 mod player;
 mod physics;
+mod walls;
 
 use startup::setup;
 use crate::player::{react_to_player_changing, reader, PlayerPlugin};
@@ -15,6 +16,7 @@ fn main() {
             DefaultPlugins,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
+            RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
 
         .add_systems(Startup, setup)
@@ -22,6 +24,7 @@ fn main() {
 
         //implement player plugin
         .add_plugins(PlayerPlugin)
+        .add_plugins(walls::WallPlugin)
 
         //player tests:
         //.add_systems(Update, player::reader)
@@ -29,3 +32,4 @@ fn main() {
 
         .run();
 }
+
