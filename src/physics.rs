@@ -27,7 +27,7 @@ impl From<&EntityInstance> for PhysicsBundle {
                     combine_rule: CoefficientCombineRule::Min,
                 },
                 rotation_constraints: LockedAxes::ROTATION_LOCKED,
-                gravity_scale: GravityScale(70.0),
+                gravity_scale: GravityScale(100.0),
                 ..Default::default()
 
             },

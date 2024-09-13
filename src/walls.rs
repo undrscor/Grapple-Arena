@@ -161,7 +161,7 @@ pub fn spawn_wall_collisions(
                                     * grid_size as f32,
                             ))
                             .insert(RigidBody::Fixed)
-                            .insert(Friction::new(1.0))
+                            .insert(Friction::new(1.0)) 
                             .insert(Transform::from_xyz(
                                 (wall_rect.left + wall_rect.right + 1) as f32 * grid_size as f32,
                                 (wall_rect.bottom + wall_rect.top + 1) as f32 * grid_size as f32,

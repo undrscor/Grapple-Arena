@@ -1,3 +1,4 @@
+use crate::ground_detection::{self, ground_detection, GroundDetection};
 use crate::physics::PhysicsBundle;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -12,7 +13,6 @@ pub struct Player {
     //pub movement_speed: Velocity,
     //pub player_colliding: bool,
     //pub jump_force: f32,
-    pub jumped: bool
 }
 
 pub const PLAYER_SPEED_MULTIPLIER: i8 = 100; //maybe take this value from player movespeed component
@@ -30,7 +30,8 @@ pub struct PlayerBundle {
 
     #[worldly]
     worldly: Worldly, //this sets player to worldly status, meaning it persists through levels and is a child of the world itself
-
+    ground_detection: GroundDetection
+    
     // The whole EntityInstance can be stored directly as an EntityInstance component
     // #[from_entity_instance]
     // entity_instance: EntityInstance,
@@ -41,21 +42,18 @@ pub struct PlayerBundle {
 pub fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
     //query request cant seem to find correct player object(?)
-    mut query: Query<(&mut Player, &mut Velocity), With<Player>>,
+    mut query: Query<(&mut Player, &mut Velocity, &GroundDetection), With<Player>>,
 ) {
-    for (mut player, mut velocity) in &mut query {
+    for (mut player, mut velocity, ground_detection) in &mut query {
         let left = input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft);
         let right = input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight);
         let x_input = -(left as i8) + right as i8;
 
         velocity.linvel.x = (x_input * PLAYER_SPEED_MULTIPLIER) as f32;
 
-        //Jumping
-        if input.just_pressed(KeyCode::Space) && (!player.jumped) {
+        //Jumping, detects if the player is on the ground so they can jump again
+        if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground) {
             velocity.linvel.y = 400.;
-            //player.jumped = true;
-            //as of now player is able to jump midair infinitely
-            //need to implement a way to turn player.jumped to false when touching the ground
         }
 
         //system to turn the player towards the direction of movement(needs more implementation)

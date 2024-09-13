@@ -6,6 +6,7 @@ mod startup;
 mod player;
 mod physics;
 mod walls;
+mod ground_detection;
 
 use startup::setup;
 use crate::player::{react_to_player_changing, reader, PlayerPlugin};
@@ -25,6 +26,7 @@ fn main() {
         //implement player plugin
         .add_plugins(PlayerPlugin)
         .add_plugins(walls::WallPlugin)
+        .add_plugins(ground_detection::GroundDetectionPlugin)
 
         //player tests:
         //.add_systems(Update, player::reader)
