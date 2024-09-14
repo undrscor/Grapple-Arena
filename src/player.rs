@@ -1,5 +1,6 @@
 use crate::ground_detection::{self, ground_detection, GroundDetection};
 use crate::physics::PhysicsBundle;
+use bevy::input::keyboard::Key;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -13,6 +14,7 @@ pub struct Player {
     //pub movement_speed: Velocity,
     //pub player_colliding: bool,
     //pub jump_force: f32,
+    pub doublejump: bool
 }
 
 pub const PLAYER_SPEED_MULTIPLIER: i8 = 100; //maybe take this value from player movespeed component
@@ -53,8 +55,18 @@ pub fn player_movement(
 
         //Jumping, detects if the player is on the ground so they can jump again
         if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground) {
-            velocity.linvel.y = 400.;
+            velocity.linvel.y = 400.; //jump height
         }
+
+        if ground_detection.on_ground { //if the player is on the ground, it means they haven't jumped yet, so set double jump to false
+            player.doublejump = false;
+        }
+
+        if input.just_pressed(KeyCode::Space) && !(player.doublejump) && !(ground_detection.on_ground) {
+            velocity.linvel.y = 400.; //jump height
+            player.doublejump = true; //since the player is not on the ground, set double jump to true so that they will only be able to jump once more before hitting the ground.
+        }
+
 
         //system to turn the player towards the direction of movement(needs more implementation)
         // if right {
