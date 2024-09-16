@@ -1,9 +1,9 @@
 use bevy::log::tracing_subscriber::fmt::time;
 use crate::ground_detection::GroundDetection;
 use crate::physics::PhysicsBundle;
+use bevy::input::keyboard::Key;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::na::vector;
 use bevy_rapier2d::prelude::*;
 
 
@@ -15,9 +15,10 @@ pub struct Player {
     //pub movement_speed: Velocity,
     //pub player_colliding: bool,
     //pub jump_force: f32,
+    pub double_jump: bool
 }
 
-pub const PLAYER_ACCELERATION_MULTIPLIER: f32 = 500000.0f32; //maybe take this value from player movespeed component
+pub const PLAYER_ACCELERATION_MULTIPLIER: f32 = 500000.0f32; //for force multiplier
 
 //playerbundle: creates player object and assigns sprite
 #[derive(Clone, Default, Bundle, LdtkEntity)]
@@ -58,7 +59,16 @@ pub fn player_movement(
 
         //Jumping, detects if the player is on the ground so they can jump again
         if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground) {
-            velocity.linvel.y = 400.;
+            velocity.linvel.y = 400.; //jump height
+        }
+
+        if ground_detection.on_ground { //if the player is on the ground, it means they haven't jumped yet, so set double jump to false
+            player.double_jump = false;
+        }
+
+        if input.just_pressed(KeyCode::Space) && !(player.doublejump) && !(ground_detection.on_ground) {
+            velocity.linvel.y = 400.; //jump height
+            player.double_jump = true; //since the player is not on the ground, set double jump to true so that they will only be able to jump once more before hitting the ground.
         }
 
 
