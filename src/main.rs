@@ -9,7 +9,8 @@ mod walls;
 mod ground_detection;
 
 use startup::setup;
-use crate::player::{react_to_player_changing, reader, PlayerPlugin};
+use crate::player::PlayerPlugin;
+//use crate::player::{react_to_player_changing, reader, PlayerPlugin}; //for testing
 
 fn main() {
     App::new()
