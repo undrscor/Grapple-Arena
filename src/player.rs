@@ -94,7 +94,7 @@ pub fn player_movement(
             player.double_jump = true; //since the player is not on the ground, set double jump to true so that they will only be able to jump once more before hitting the ground.
         }
 
-        //jump higher
+        //jump higher //check numbers
         if input.pressed(KeyCode::Space) {
             if (velocity.linvel.y >= 30.) {
                 gravity.0 = 60.;
