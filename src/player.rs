@@ -66,7 +66,7 @@ pub fn player_movement(
             player.double_jump = false;
         }
 
-        if input.just_pressed(KeyCode::Space) && !(player.doublejump) && !(ground_detection.on_ground) {
+        if input.just_pressed(KeyCode::Space) && !(player.double_jump) && !(ground_detection.on_ground) {
             velocity.linvel.y = 400.; //jump height
             player.double_jump = true; //since the player is not on the ground, set double jump to true so that they will only be able to jump once more before hitting the ground.
         }
