@@ -16,7 +16,8 @@ pub struct Player {
     pub double_jump: bool
 }
 
-pub const PLAYER_ACCELERATION_MULTIPLIER: f32 = 150000.0f32; //for force multiplier
+const PLAYER_ACCELERATION_MULTIPLIER: f32 = 1500.0f32; //for force multiplier
+const TARGET_TOP_SPEED: f32 = 300.0;
 
 //playerbundle: creates player object and assigns sprite
 #[derive(Clone, Default, Bundle, LdtkEntity)]
@@ -36,7 +37,6 @@ pub struct PlayerBundle {
     // The whole EntityInstance can be stored directly as an EntityInstance component
     // #[from_entity_instance]
     // entity_instance: EntityInstance,
-
 }
 
 //movement system, updates player velocity but needs physics system to be finished to work properly
@@ -47,11 +47,39 @@ pub fn player_movement(
     for (mut player, mut velocity, ground_detection, mut force) in &mut query {
         let left = input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft);
         let right = input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight);
-        let x_input = -(left as i8) + right as i8;
+        let x_input = -&(left as i8) + &(right as i8);
 
         //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
         //todo: implement max velocity
-        force.force.x = (x_input as f32) * PLAYER_ACCELERATION_MULTIPLIER;
+        //force.force.x = (x_input as f32) * PLAYER_ACCELERATION_MULTIPLIER;
+
+        if right
+            {
+                let new_horizontal_force = calc_force_diff(
+                    x_input as f32,
+                    velocity.linvel.x,
+                    TARGET_TOP_SPEED,
+                );
+
+                force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                // sprite.flip_x = false;
+            } else if left
+            {
+                let new_horizontal_force = calc_force_diff(
+                    -x_input as f32,
+                    velocity.linvel.x,
+                    -TARGET_TOP_SPEED,
+                );
+
+                force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                // sprite.flip_x = true;
+            } else {
+                if velocity.linvel.x.abs() > 0.01 {
+                    let new_horizontal_force =
+                        -velocity.linvel.x;
+                    force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                }
+            }
 
 
         //Jumping, detects if the player is on the ground so they can jump again
@@ -78,6 +106,20 @@ pub fn player_movement(
         //     player.facing_right = false;
         //     //print!("{velocity:?}");
         // }
+    }
+/// clamped_input is a 0.0-1.0 value representing the user's
+/// desired percentage of top speed to hold
+///
+/// `current_velocity` is the current horizontal velocity
+fn calc_force_diff(
+    input: f32,
+    current_velocity: f32,
+    target_velocity: f32,
+    ) -> f32 {
+        let target_speed = target_velocity * input;
+        let diff_to_make_up = target_speed - current_velocity;
+        let new_force = diff_to_make_up * 2.0;
+        new_force
     }
 }
 
