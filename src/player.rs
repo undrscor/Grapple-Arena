@@ -1,7 +1,5 @@
-use bevy::log::tracing_subscriber::fmt::time;
 use crate::ground_detection::GroundDetection;
 use crate::physics::PhysicsBundle;
-use bevy::input::keyboard::Key;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -18,7 +16,7 @@ pub struct Player {
     pub double_jump: bool
 }
 
-pub const PLAYER_ACCELERATION_MULTIPLIER: f32 = 500000.0f32; //for force multiplier
+pub const PLAYER_ACCELERATION_MULTIPLIER: f32 = 150000.0f32; //for force multiplier
 
 //playerbundle: creates player object and assigns sprite
 #[derive(Clone, Default, Bundle, LdtkEntity)]
@@ -44,7 +42,6 @@ pub struct PlayerBundle {
 //movement system, updates player velocity but needs physics system to be finished to work properly
 pub fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
-    //time: Res<Time>,
     mut query: Query<(&mut Player, &mut Velocity, &GroundDetection, &mut ExternalForce), With<Player>>,
 ) {
     for (mut player, mut velocity, ground_detection, mut force) in &mut query {
