@@ -28,6 +28,7 @@ fn main() {
         .add_plugins(walls::WallPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
 
+
         //player tests:
         //.add_systems(Update, player::reader)
         //.add_systems(Update, player::react_to_player_changing)

@@ -1,13 +1,15 @@
-use crate::ground_detection::{self, ground_detection, GroundDetection};
+use bevy::log::tracing_subscriber::fmt::time;
+use crate::ground_detection::GroundDetection;
 use crate::physics::PhysicsBundle;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_rapier2d::na::vector;
 use bevy_rapier2d::prelude::*;
 
 
 //player system, the parameters probably don't go here, need to figure out if they go in the bundle
 // #[derive(Default, Debug, Component)]
-#[derive(Copy, Clone, Eq, PartialEq,Default, Debug, Component)]
+#[derive(Copy, Clone, Eq, PartialEq, Default, Debug, Component)]
 pub struct Player {
     //pub facing_right: bool,
     //pub movement_speed: Velocity,
@@ -15,9 +17,9 @@ pub struct Player {
     //pub jump_force: f32,
 }
 
-pub const PLAYER_SPEED_MULTIPLIER: i8 = 100; //maybe take this value from player movespeed component
+pub const PLAYER_ACCELERATION_MULTIPLIER: f32 = 500000.0f32; //maybe take this value from player movespeed component
 
-//playerbundle: creates player object and assigns sprite, todo add more components(?), implement physics
+//playerbundle: creates player object and assigns sprite
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     #[sprite_sheet_bundle]
@@ -30,8 +32,8 @@ pub struct PlayerBundle {
 
     #[worldly]
     worldly: Worldly, //this sets player to worldly status, meaning it persists through levels and is a child of the world itself
-    ground_detection: GroundDetection
-    
+    ground_detection: GroundDetection,
+
     // The whole EntityInstance can be stored directly as an EntityInstance component
     // #[from_entity_instance]
     // entity_instance: EntityInstance,
@@ -41,20 +43,24 @@ pub struct PlayerBundle {
 //movement system, updates player velocity but needs physics system to be finished to work properly
 pub fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
-    //query request cant seem to find correct player object(?)
-    mut query: Query<(&mut Player, &mut Velocity, &GroundDetection), With<Player>>,
+    //time: Res<Time>,
+    mut query: Query<(&mut Player, &mut Velocity, &GroundDetection, &mut ExternalForce), With<Player>>,
 ) {
-    for (mut player, mut velocity, ground_detection) in &mut query {
+    for (mut player, mut velocity, ground_detection, mut force) in &mut query {
         let left = input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft);
         let right = input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight);
         let x_input = -(left as i8) + right as i8;
 
-        velocity.linvel.x = (x_input * PLAYER_SPEED_MULTIPLIER) as f32;
+        //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
+        //todo: implement max velocity
+        force.force.x = (x_input as f32) * PLAYER_ACCELERATION_MULTIPLIER;
+
 
         //Jumping, detects if the player is on the ground so they can jump again
         if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground) {
             velocity.linvel.y = 400.;
         }
+
 
         //system to turn the player towards the direction of movement(needs more implementation)
         // if right {

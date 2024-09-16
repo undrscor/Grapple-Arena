@@ -8,8 +8,10 @@ pub struct PhysicsBundle {
     //assigns rigid body component: https://rapier.rs/docs/user_guides/bevy_plugin/rigid_bodies
     pub rigid_body: RigidBody,
     //adds collider, velocity, locked rotation option, gravity, friction
+    //pub mass: MassProperties,
     pub collider: Collider,
     pub velocity: Velocity,
+    pub force: ExternalForce,
     pub rotation_constraints: LockedAxes,
     pub gravity_scale: GravityScale,
     pub friction: Friction,
@@ -29,7 +31,6 @@ impl From<&EntityInstance> for PhysicsBundle {
                 rotation_constraints: LockedAxes::ROTATION_LOCKED,
                 gravity_scale: GravityScale(100.0),
                 ..Default::default()
-
             },
             _ => PhysicsBundle::default(),
         }
