@@ -1,9 +1,9 @@
 use crate::ground_detection::GroundDetection;
 use crate::physics::PhysicsBundle;
+use crate::wall_climb::ClimbDetection;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
-
 
 //player system, the parameters probably don't go here, need to figure out if they go in the bundle
 // #[derive(Default, Debug, Component)]
@@ -18,7 +18,7 @@ pub struct Player {
 
 const PLAYER_ACCELERATION_MULTIPLIER: f32 = 400.0f32; //for force multiplier
 const PLAYER_TOP_SPEED: f32 = 250.0;
-const PLAYER_JUMP_STRENGTH: f32 = 300.0;
+const PLAYER_JUMP_STRENGTH: f32 = 270.0;
 
 //playerbundle: creates player object and assigns sprite
 #[derive(Clone, Default, Bundle, LdtkEntity)]
@@ -34,6 +34,7 @@ pub struct PlayerBundle {
     #[worldly]
     worldly: Worldly, //this sets player to worldly status, meaning it persists through levels and is a child of the world itself
     ground_detection: GroundDetection,
+    climb_detection: ClimbDetection,
 
     // The whole EntityInstance can be stored directly as an EntityInstance component
     // #[from_entity_instance]
@@ -43,9 +44,18 @@ pub struct PlayerBundle {
 //movement system, updates player velocity but needs physics system to be finished to work properly
 pub fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Player, &mut Velocity, &GroundDetection, &mut ExternalForce, &mut GravityScale), With<Player>>,
+    mut query: Query<(&mut Player, &mut Velocity, &GroundDetection, &ClimbDetection, &mut ExternalForce, &mut GravityScale, &mut Damping), With<Player>>,
 ) {
-    for (mut player, mut velocity, ground_detection, mut force, mut gravity) in &mut query {
+    for (
+        mut player,
+        mut velocity,
+        ground_detection,
+        climb_detection,
+        mut force,
+        mut gravity,
+        mut damping,
+    )
+    in &mut query {
         let left = input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft);
         let right = input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight);
         let x_input = -&(left as i8) + &(right as i8);
@@ -83,10 +93,10 @@ pub fn player_movement(
 
 
         //Jumping, detects if the player is on the ground so they can jump again
-        if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground) {
+        if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground || climb_detection.climbing) {
             velocity.linvel.y = PLAYER_JUMP_STRENGTH; //jump height
         }
-        if ground_detection.on_ground { //if the player is on the ground, it means they haven't jumped yet, so set double jump to false
+        if ground_detection.on_ground || climb_detection.climbing { //if the player is on the ground or climbing, it means they haven't jumped yet, so set double jump to false
             player.double_jump = false;
         }
         if input.just_pressed(KeyCode::Space) && !(player.double_jump) && !(ground_detection.on_ground) {
@@ -94,12 +104,11 @@ pub fn player_movement(
             player.double_jump = true; //since the player is not on the ground, set double jump to true so that they will only be able to jump once more before hitting the ground.
         }
 
-        //jump higher //check numbers
+        //jump higher(holding space) //check numbers
         if input.pressed(KeyCode::Space) {
             if (velocity.linvel.y >= 30.) {
-                gravity.0 = 60.;
-            }
-            else {
+                gravity.0 = 55.;
+            } else {
                 gravity.0 = 100.;
             }
         }
@@ -107,6 +116,17 @@ pub fn player_movement(
         //fast fall
         if input.pressed(KeyCode::ArrowDown) || input.pressed(KeyCode::KeyS) {
             gravity.0 = 200.;
+        }
+
+        //climbing
+        if climb_detection.climbing{
+            damping.linear_damping = 15.0;
+            if input.pressed(KeyCode::Space) {
+                damping.linear_damping = 0.0;
+            }
+        }
+        else {
+            damping.linear_damping = 0.0;
         }
 
         // we can check multiple at once with `.any_*`

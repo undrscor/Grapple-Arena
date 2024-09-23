@@ -7,6 +7,7 @@ mod player;
 mod physics;
 mod walls;
 mod ground_detection;
+mod wall_climb;
 
 use startup::setup;
 use crate::player::PlayerPlugin;
@@ -28,6 +29,7 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(walls::WallPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
+        .add_plugins(wall_climb::WallClimbPlugin)
 
 
         //player tests:
@@ -36,4 +38,5 @@ fn main() {
 
         .run();
 }
+
 
