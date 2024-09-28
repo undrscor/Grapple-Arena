@@ -1,3 +1,5 @@
+// player.rs
+use crate::animation::*;
 use crate::ground_detection::GroundDetection;
 use crate::physics::PhysicsBundle;
 use crate::wall_climb::ClimbDetection;
@@ -5,48 +7,80 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-//player system, the parameters probably don't go here, need to figure out if they go in the bundle
-// #[derive(Default, Debug, Component)]
+
+#[derive(Clone, Default, Bundle, LdtkEntity)]
+pub struct PlayerBundle {
+    // #[sprite_sheet_bundle]
+    // sprite_sheet_bundle: LdtkSpriteSheetBundle,
+    player: Player,
+    player_input: PlayerInput,
+    movement_intent: MovementIntent,
+    #[from_entity_instance]
+    physics: PhysicsBundle,
+    #[worldly]
+    worldly: Worldly,
+    ground_detection: GroundDetection,
+    climb_detection: ClimbDetection,
+
+    animation_bundle: AnimationBundle,
+    #[from_entity_instance]
+    entity_instance: EntityInstance,
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Default, Debug, Component)]
 pub struct Player {
-    //pub facing_right: bool,
-    //pub movement_speed: Velocity,
-    //pub player_colliding: bool,
-    //pub jump_force: f32,
     pub double_jump: bool,
+}
+
+#[derive(Component, Default, Clone)]
+pub struct PlayerInput {
+    pub move_left: bool,
+    pub move_right: bool,
+    pub jump: bool,
+    pub jump_held: bool,
+    pub fast_fall: bool,
+}
+
+#[derive(Component, Default, Clone)]
+pub struct MovementIntent {
+    pub horizontal: f32,
+    pub vertical: f32,
+    pub wants_to_jump: bool,
 }
 
 const PLAYER_ACCELERATION_MULTIPLIER: f32 = 400.0f32; //for force multiplier
 const PLAYER_TOP_SPEED: f32 = 250.0;
 const PLAYER_JUMP_STRENGTH: f32 = 270.0;
 
-//playerbundle: creates player object and assigns sprite
-#[derive(Clone, Default, Bundle, LdtkEntity)]
-pub struct PlayerBundle {
-    #[sprite_sheet_bundle]
-    sprite_sheet_bundle: LdtkSpriteSheetBundle,
-
-    #[from_entity_instance]
-    physics: PhysicsBundle,
-
-    player: Player,
-
-    #[worldly]
-    worldly: Worldly, //this sets player to worldly status, meaning it persists through levels and is a child of the world itself
-    ground_detection: GroundDetection,
-    climb_detection: ClimbDetection,
-
-    // The whole EntityInstance can be stored directly as an EntityInstance component
-    // #[from_entity_instance]
-    // entity_instance: EntityInstance,
+pub fn player_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<&mut PlayerInput, With<Player>>,
+) {
+    for mut input in query.iter_mut() {
+        input.move_left = keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft);
+        input.move_right = keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
+        input.jump = keyboard_input.just_pressed(KeyCode::Space);
+        input.jump_held = keyboard_input.pressed(KeyCode::Space);
+        input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
+    }
 }
 
-//movement system, updates player velocity but needs physics system to be finished to work properly
 pub fn player_movement(
-    input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Player, &mut Velocity, &GroundDetection, &ClimbDetection, &mut ExternalForce, &mut GravityScale, &mut Damping), With<Player>>,
+    mut query: Query<(
+        &PlayerInput,
+        &mut MovementIntent,
+        &mut Player,
+        &mut Velocity,
+        &GroundDetection,
+        &ClimbDetection,
+        &mut ExternalForce,
+        &mut GravityScale,
+        &mut Damping,
+    )>,
 ) {
     for (
+        input,
+        mut intent,
         mut player,
         mut velocity,
         ground_detection,
@@ -54,29 +88,23 @@ pub fn player_movement(
         mut force,
         mut gravity,
         mut damping,
-    )
-    in &mut query {
-        let left = input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft);
-        let right = input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight);
-        let x_input = -&(left as i8) + &(right as i8);
+    ) in query.iter_mut() {
 
         //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
-        //force.force.x = (x_input as f32) * PLAYER_ACCELERATION_MULTIPLIER; //without max vel
-
-        if right
+        if input.move_right
         {
             let new_horizontal_force = calc_force_diff(
-                x_input as f32,
+                intent.horizontal,
                 velocity.linvel.x,
                 PLAYER_TOP_SPEED,
             );
 
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
             // sprite.flip_x = false;
-        } else if left
+        } else if input.move_left
         {
             let new_horizontal_force = calc_force_diff(
-                -x_input as f32,
+                intent.horizontal,
                 velocity.linvel.x,
                 -PLAYER_TOP_SPEED,
             );
@@ -91,107 +119,116 @@ pub fn player_movement(
             }
         }
 
-
-        //Jumping, detects if the player is on the ground so they can jump again
-        if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground || climb_detection.climbing) {
-            velocity.linvel.y = PLAYER_JUMP_STRENGTH; //jump height
+        // Handle jumping
+        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || !player.double_jump);
+        if intent.wants_to_jump {
+            if !ground_detection.on_ground && !climb_detection.climbing {
+                player.double_jump = true;
+            }
+            velocity.linvel.y = PLAYER_JUMP_STRENGTH;
         }
-        if ground_detection.on_ground || climb_detection.climbing { //if the player is on the ground or climbing, it means they haven't jumped yet, so set double jump to false
+
+        // Reset double jump if on ground or climbing
+        if ground_detection.on_ground || climb_detection.climbing {
             player.double_jump = false;
         }
-        if input.just_pressed(KeyCode::Space) && !(player.double_jump) && !(ground_detection.on_ground) {
-            velocity.linvel.y = PLAYER_JUMP_STRENGTH; //jump height
-            player.double_jump = true; //since the player is not on the ground, set double jump to true so that they will only be able to jump once more before hitting the ground.
+
+        // Adjust jump height
+        if input.jump_held && velocity.linvel.y > 0.0 {
+            gravity.0 = 55.0;
+        } else {
+            gravity.0 = 100.0;
         }
 
-        //jump higher(holding space) //check numbers
-        if input.pressed(KeyCode::Space) {
-            if (velocity.linvel.y >= 30.) {
-                gravity.0 = 55.;
-            } else {
-                gravity.0 = 100.;
-            }
+        // Fast fall
+        if input.fast_fall {
+            gravity.0 = 200.0;
         }
 
-        //fast fall
-        if input.pressed(KeyCode::ArrowDown) || input.pressed(KeyCode::KeyS) {
-            gravity.0 = 200.;
-        }
-
-        //climbing
-        if climb_detection.climbing{
-            damping.linear_damping = 15.0;
-            if input.pressed(KeyCode::Space) {
-                damping.linear_damping = 0.0;
-            }
-        }
-        else {
+        // Climbing
+        if climb_detection.climbing {
+            damping.linear_damping = if input.jump_held { 0.0 } else { 15.0 };
+        } else {
             damping.linear_damping = 0.0;
         }
 
-        // we can check multiple at once with `.any_*`
-        if !input.any_pressed([KeyCode::ArrowDown, KeyCode::KeyS, KeyCode::Space]) {
-            gravity.0 = 100.;
-        }
-
-        //system to turn the player towards the direction of movement(needs more implementation)
-        // if right {
-        //     player.facing_right = true;
-        //     //print!("{velocity:?}");
-        // }
-        // if left {
-        //     player.facing_right = false;
-        //     //print!("{velocity:?}");
-        // }
-    }
-
-    //calculates force needed to reach and maintain max speed based on input
-    fn calc_force_diff(
-        input: f32,
-        current_velocity: f32,
-        target_velocity: f32,
-    ) -> f32 {
-        let target_speed = target_velocity * input;
-        let diff_to_make_up = target_speed - current_velocity;
-        let new_force = diff_to_make_up * 2.0;
-        new_force
+        // Vertical movement intent
+        intent.vertical = velocity.linvel.y;
     }
 }
 
-//to test if entity is found
-pub(crate) fn reader(query: Query<&Player, With<Player>>) {
-    if let Ok(player) = query.get_single() {
-        println!("found player: {player:?}");
-    } else {
-        println!("not found")
-    }
+fn calc_force_diff(input: f32, current_velocity: f32, target_velocity: f32) -> f32 {
+    let target_speed = target_velocity * input.signum();
+    let diff_to_make_up = target_speed - current_velocity;
+    diff_to_make_up * 2.0
 }
 
-//to test if entity is changed
-pub(crate) fn react_to_player_changing(
-    query: Query<Ref<Player>>
+
+fn update_player_animation(
+    time: Res<Time>,
+    texture_atlases: Res<Assets<TextureAtlasLayout>>,
+    mut animation_assets: ResMut<AnimationAssets>,
+    mut query: Query<(&mut TextureAtlas, &mut Sprite, &mut Handle<Image>, &Velocity)>,
 ) {
-    for player in &query {
-        if player.is_changed() {
-            println!("player changed!!!");
+    for (mut texture_atlas, mut sprite, mut texture, velocity) in query.iter_mut() {
+        // Determine animation type based on velocity
+        let animation_type = if velocity.linvel.y.abs() > 0.1 {
+            AnimationType::Jump
+        } else {
+            AnimationType::Run
+        };
+
+        let layout_handle = animation_assets.get_layout(animation_type).cloned();
+        let texture_handle = animation_assets.get_texture(animation_type).cloned();
+
+        // Get the layout handle and texture handle for the current animation type
+        if let (Some(layout_handle), Some(texture_handle)) = (layout_handle, texture_handle) {
+            // If the animation type changed, update the texture atlas layout and texture
+            if texture_atlas.layout != layout_handle {
+                texture_atlas.layout = layout_handle.clone();
+                texture_atlas.index = 0; // Reset to first frame of new animation
+                *texture = texture_handle.clone(); // Update the texture
+                if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
+                    timer.reset();
+                }
+                println!("Animation type changed to {:?}", animation_type);
+            }
+
+            // Animate sprite
+            if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
+                timer.tick(time.delta());
+                //println!("Timer: {:?}, Finished: {}", timer, timer.just_finished());
+                if timer.just_finished() {
+                    if let Some(layout) = texture_atlases.get(&texture_atlas.layout) {
+                        let texture_count = layout.textures.len();
+                        texture_atlas.index = (texture_atlas.index + 1) % texture_count;
+
+                        // let urect = layout.textures[texture_atlas.index];
+                        // sprite.rect = Some(Rect {
+                        //     min: Vec2::new(urect.min.x as f32, urect.min.y as f32),
+                        //     max: Vec2::new(urect.max.x as f32, urect.max.y as f32),
+                        // });
+
+                        // Ensure the sprite uses the full texture
+                        //sprite.custom_size = Some(Vec2::new(urect.width() as f32, urect.height() as f32));
+
+                        println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
+                    }
+                }
+            } else {
+                println!("Failed to get layout or texture handle for {:?}", animation_type);
+            }
         }
     }
 }
 
-//this can turn velocity into transform manually/modify it(?)
-// pub(crate) fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
-//     for (mut transform, velocity) in &mut query {
-//         transform.translation.x += velocity.x * time.delta_seconds();
-//         transform.translation.y += velocity.y * time.delta_seconds();
-//     }
-// }
 
-//player plugin to register player and add movement system
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, player_movement)
-            .register_ldtk_entity::<PlayerBundle>("Player");
+        app
+            .register_ldtk_entity::<PlayerBundle>("Player")
+            .add_systems(Update, (player_input, player_movement.after(player_input), update_player_animation.after(player_movement)));
     }
 }

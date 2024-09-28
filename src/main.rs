@@ -8,10 +8,9 @@ mod physics;
 mod walls;
 mod ground_detection;
 mod wall_climb;
+mod animation;
 
 use startup::setup;
-use crate::player::PlayerPlugin;
-//use crate::player::{react_to_player_changing, reader, PlayerPlugin}; //for testing
 
 fn main() {
     App::new()
@@ -25,8 +24,11 @@ fn main() {
         .add_systems(Startup, setup)
         .insert_resource(LevelSelection::index(0))
 
+        //.register_ldtk_entity::<PlayerBundle>("Player")
+
         //implement player plugin
-        .add_plugins(PlayerPlugin)
+        .add_plugins(animation::PlayerAnimationPlugin)
+        .add_plugins(player::PlayerPlugin)
         .add_plugins(walls::WallPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
         .add_plugins(wall_climb::WallClimbPlugin)
@@ -37,6 +39,5 @@ fn main() {
         //.add_systems(Update, player::react_to_player_changing)
 
         .run();
+
 }
-
-

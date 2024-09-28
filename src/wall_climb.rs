@@ -22,7 +22,8 @@ pub fn spawn_climb_sensor(
         if let Some(cuboid) = shape.as_cuboid() {
             let Vec2 {
                 x: half_extents_x,
-                y: half_extents_y,
+                //y: half_extents_y,
+                ..
             } = cuboid.half_extents();
 
             //let detector_shape = Collider::cuboid(half_extents_x / 2.0, 2.);
@@ -55,7 +56,7 @@ pub fn climb_detection(
     for collision_event in collisions.read() {
         match collision_event {
             CollisionEvent::Started(e1, e2, _) => {
-                println!("Climbin!");
+                //println!("Climbin!");
                 if collidables.contains(*e1) {
                     if let Ok(mut sensor) = climb_sensors.get_mut(*e2) {
                         sensor.intersecting_climbables.insert(*e1);

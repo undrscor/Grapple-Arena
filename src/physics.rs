@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_rapier2d::rapier::prelude::RigidBodyDamping;
 
-//physics system implementation, needs A LOT of work, documentation at https://rapier.rs/docs/
+
+//physics system implementation, documentation at https://rapier.rs/docs/
 #[derive(Default, Bundle, Clone)]
 pub struct PhysicsBundle {
     //assigns rigid body component: https://rapier.rs/docs/user_guides/bevy_plugin/rigid_bodies
@@ -21,7 +21,7 @@ pub struct PhysicsBundle {
 
 //implements physics bundle, using "from" conversion for different entities
 impl From<&EntityInstance> for PhysicsBundle {
-    fn from(entity_instance: &EntityInstance) -> PhysicsBundle {
+    fn from(entity_instance: &EntityInstance) -> Self {
         match entity_instance.identifier.as_ref() {
             "Player" => PhysicsBundle {
                 collider: Collider::cuboid(10., 16.),
