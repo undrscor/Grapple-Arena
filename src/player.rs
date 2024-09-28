@@ -10,19 +10,16 @@ use bevy_rapier2d::prelude::*;
 
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
-    // #[sprite_sheet_bundle]
-    // sprite_sheet_bundle: LdtkSpriteSheetBundle,
     player: Player,
     player_input: PlayerInput,
-    movement_intent: MovementIntent,
     #[from_entity_instance]
     physics: PhysicsBundle,
-    #[worldly]
-    worldly: Worldly,
+    animation_bundle: AnimationBundle,
+    movement_intent: MovementIntent,
     ground_detection: GroundDetection,
     climb_detection: ClimbDetection,
-
-    animation_bundle: AnimationBundle,
+    #[worldly]
+    worldly: Worldly,
     #[from_entity_instance]
     entity_instance: EntityInstance,
 }
@@ -203,6 +200,7 @@ fn update_player_animation(
                         let texture_count = layout.textures.len();
                         texture_atlas.index = (texture_atlas.index + 1) % texture_count;
 
+                        //for custom sizing
                         // let urect = layout.textures[texture_atlas.index];
                         // sprite.rect = Some(Rect {
                         //     min: Vec2::new(urect.min.x as f32, urect.min.y as f32),
@@ -212,7 +210,7 @@ fn update_player_animation(
                         // Ensure the sprite uses the full texture
                         //sprite.custom_size = Some(Vec2::new(urect.width() as f32, urect.height() as f32));
 
-                        println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
+                        //println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
                     }
                 }
             } else {
@@ -232,3 +230,4 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, (player_input, player_movement.after(player_input), update_player_animation.after(player_movement)));
     }
 }
+

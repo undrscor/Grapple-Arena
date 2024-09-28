@@ -12,8 +12,6 @@ pub struct AnimationBundle {
 
 #[derive(Clone, Component, Copy, Debug, PartialEq, Eq, Hash, Default)]
 pub enum AnimationType {
-    // #[default]
-    // Idle,
     #[default]
     Run,
     Jump,
@@ -23,7 +21,7 @@ pub enum AnimationType {
 pub struct AnimationTimer(pub Timer);
 
 #[derive(Resource)]
-pub(crate) struct AnimationAssets {
+pub struct AnimationAssets {
     layouts: HashMap<AnimationType, Handle<TextureAtlasLayout>>,
     textures: HashMap<AnimationType, Handle<Image>>,
     timers: HashMap<AnimationType, Timer>,
