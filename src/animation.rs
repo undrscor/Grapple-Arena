@@ -6,8 +6,7 @@ use bevy::utils::*;
 pub struct AnimationBundle {
     pub animation_type: AnimationType,
     pub texture_atlas: TextureAtlas,                        // The texture atlas for animations
-    pub sprite: SpriteBundle,
-    pub animation_timer: AnimationTimer,                    // Timer to track frame changes
+    pub sprite: SpriteBundle,     // Timer to track frame changes
 }
 
 #[derive(Clone, Component, Copy, Debug, PartialEq, Eq, Hash, Default)]
@@ -16,9 +15,6 @@ pub enum AnimationType {
     Run,
     Jump,
 }
-
-#[derive(Debug, Component, Default, Clone)]
-pub struct AnimationTimer(pub Timer);
 
 #[derive(Resource)]
 pub struct AnimationAssets {
