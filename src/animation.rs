@@ -14,6 +14,7 @@ pub enum AnimationType {
     #[default]
     Run,
     Jump,
+    Idle,
 }
 
 #[derive(Resource)]
@@ -64,6 +65,7 @@ fn setup_animation_assets(
 
     load_animation(AnimationType::Jump, "industrialAssets/6. Character Animations - Free/Anim_Robot_Jump1_v1.1_spritesheet.png".to_string(), 3, 3, 0.1);
     load_animation(AnimationType::Run, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 3, 2, 0.1);
+    load_animation(AnimationType::Idle, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
     // Add more animations as needed
 
     commands.insert_resource(AnimationAssets { layouts, textures, timers });
@@ -78,7 +80,3 @@ impl Plugin for PlayerAnimationPlugin {
             .add_systems(Startup, setup_animation_assets);
     }
 }
-
-
-
-

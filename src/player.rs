@@ -73,6 +73,7 @@ pub fn player_movement(
         &mut ExternalForce,
         &mut GravityScale,
         &mut Damping,
+        &mut Sprite,
     )>,
 ) {
     for (
@@ -85,8 +86,11 @@ pub fn player_movement(
         mut force,
         mut gravity,
         mut damping,
+        mut sprite,
     ) in query.iter_mut() {
 
+        //idle frame
+        let mut is_idle = true;
         //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
         if input.move_right
         {
@@ -97,7 +101,8 @@ pub fn player_movement(
             );
 
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
-            // sprite.flip_x = false;
+            sprite.flip_x = false;
+            is_idle = false;
         } else if input.move_left
         {
             let new_horizontal_force = calc_force_diff(
@@ -107,12 +112,14 @@ pub fn player_movement(
             );
 
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
-            // sprite.flip_x = true;
+            sprite.flip_x = true;
+            is_idle = false;
         } else {
             if velocity.linvel.x.abs() > 0.01 {
                 let new_horizontal_force =
                     -velocity.linvel.x;
                 force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                is_idle = false;
             }
         }
 
@@ -151,6 +158,11 @@ pub fn player_movement(
 
         // Vertical movement intent
         intent.vertical = velocity.linvel.y;
+
+        //idle
+        if velocity.linvel.x.abs() < 0.01 && velocity.linvel.y.abs() < 0.01 {
+            is_idle = true;
+        }
     }
 }
 
@@ -165,14 +177,16 @@ fn update_player_animation(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut animation_assets: ResMut<AnimationAssets>,
-    mut query: Query<(&mut TextureAtlas, &mut Sprite, &mut Handle<Image>, &Velocity)>,
+    mut query: Query<(&mut TextureAtlas, &mut Sprite, &mut Handle<Image>, &Velocity, &MovementIntent,)>,
 ) {
-    for (mut texture_atlas, mut sprite, mut texture, velocity) in query.iter_mut() {
+    for (mut texture_atlas, mut sprite, mut texture, velocity, intent) in query.iter_mut() {
         // Determine animation type based on velocity
         let animation_type = if velocity.linvel.y.abs() > 0.1 {
             AnimationType::Jump
-        } else {
+        } else if velocity.linvel.x.abs() > 0.1 {
             AnimationType::Run
+        } else {
+            AnimationType::Idle
         };
 
         let layout_handle = animation_assets.get_layout(animation_type).cloned();
@@ -191,30 +205,32 @@ fn update_player_animation(
                 println!("Animation type changed to {:?}", animation_type);
             }
 
-            // Animate sprite
-            if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
-                timer.tick(time.delta());
-                //println!("Timer: {:?}, Finished: {}", timer, timer.just_finished());
-                if timer.just_finished() {
-                    if let Some(layout) = texture_atlases.get(&texture_atlas.layout) {
-                        let texture_count = layout.textures.len();
-                        texture_atlas.index = (texture_atlas.index + 1) % texture_count;
+            if animation_type != AnimationType::Idle {
+                // Animate sprite
+                if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
+                    timer.tick(time.delta());
+                    //println!("Timer: {:?}, Finished: {}", timer, timer.just_finished());
+                    if timer.just_finished() {
+                        if let Some(layout) = texture_atlases.get(&texture_atlas.layout) {
+                            let texture_count = layout.textures.len();
+                            texture_atlas.index = (texture_atlas.index + 1) % texture_count;
 
-                        //for custom sizing
-                        // let urect = layout.textures[texture_atlas.index];
-                        // sprite.rect = Some(Rect {
-                        //     min: Vec2::new(urect.min.x as f32, urect.min.y as f32),
-                        //     max: Vec2::new(urect.max.x as f32, urect.max.y as f32),
-                        // });
+                            //for custom sizing
+                            // let urect = layout.textures[texture_atlas.index];
+                            // sprite.rect = Some(Rect {
+                            //     min: Vec2::new(urect.min.x as f32, urect.min.y as f32),
+                            //     max: Vec2::new(urect.max.x as f32, urect.max.y as f32),
+                            // });
 
-                        // Ensure the sprite uses the full texture
-                        //sprite.custom_size = Some(Vec2::new(urect.width() as f32, urect.height() as f32));
+                            // Ensure the sprite uses the full texture
+                            //sprite.custom_size = Some(Vec2::new(urect.width() as f32, urect.height() as f32));
 
-                        //println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
+                            //println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
+                        }
                     }
+                } else {
+                    println!("Failed to get layout or texture handle for {:?}", animation_type);
                 }
-            } else {
-                println!("Failed to get layout or texture handle for {:?}", animation_type);
             }
         }
     }
