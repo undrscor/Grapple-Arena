@@ -18,7 +18,7 @@ fn main() {
             DefaultPlugins,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            RapierDebugRenderPlugin::default(), //for debugging colliders
+            // RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
 
         .add_systems(Startup, setup)
