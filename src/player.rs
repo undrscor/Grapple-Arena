@@ -7,7 +7,6 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     player: Player,
@@ -236,9 +235,7 @@ fn update_player_animation(
     }
 }
 
-
 pub struct PlayerPlugin;
-
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app

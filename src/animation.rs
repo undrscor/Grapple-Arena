@@ -23,7 +23,6 @@ pub struct AnimationAssets {
     textures: HashMap<AnimationType, Handle<Image>>,
     timers: HashMap<AnimationType, Timer>,
 }
-
 impl AnimationAssets {
     pub(crate) fn get_layout(&self, animation_type: AnimationType) -> Option<&Handle<TextureAtlasLayout>> {
         self.layouts.get(&animation_type)
@@ -37,7 +36,6 @@ impl AnimationAssets {
         self.timers.get_mut(&animation_type)
     }
 }
-
 
 // This system should be run during startup to initialize the AnimationAtlases resource
 fn setup_animation_assets(
@@ -71,9 +69,7 @@ fn setup_animation_assets(
     commands.insert_resource(AnimationAssets { layouts, textures, timers });
 }
 
-
 pub struct PlayerAnimationPlugin;
-
 impl Plugin for PlayerAnimationPlugin {
     fn build(&self, app: &mut App) {
         app

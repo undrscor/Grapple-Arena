@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.14.2"
-bevy_ecs_ldtk = "0.10.0"
-#bevy_rapier2d = "0.27.0"
+bevy = "*"
+bevy_ecs_ldtk = "*"
+#bevy_rapier2d = "*"
 bevy_rapier2d = { version = "*", features = [ "simd-stable", "debug-render-2d" ] } #for debug-render
 
 # Enable a small amount of optimization in the dev profile.

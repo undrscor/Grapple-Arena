@@ -42,7 +42,6 @@ pub fn spawn_wall_collisions(
         right: i32,
     }
 
-
     /// A simple rectangle type representing a wall of any size
     struct Rect {
         left: i32,
@@ -176,9 +175,7 @@ pub fn spawn_wall_collisions(
     }
 }
 
-
 pub struct WallPlugin;
-
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_wall_collisions)

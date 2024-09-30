@@ -94,7 +94,6 @@ pub fn update_climbing(
 }
 
 pub struct WallClimbPlugin;
-
 impl Plugin for crate::wall_climb::WallClimbPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, crate::wall_climb::spawn_climb_sensor)
