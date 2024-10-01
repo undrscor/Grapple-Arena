@@ -10,6 +10,7 @@ use bevy_rapier2d::prelude::*;
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     player: Player,
+    player_position: PlayerPosition,
     player_input: PlayerInput,
     #[from_entity_instance]
     physics: PhysicsBundle,
@@ -26,6 +27,12 @@ pub struct PlayerBundle {
 #[derive(Copy, Clone, Eq, PartialEq, Default, Debug, Component)]
 pub struct Player {
     pub double_jump: bool,
+}
+
+#[derive(Clone, Default, Component)]
+pub struct PlayerPosition {
+    pub x: f32,
+    pub y: f32,
 }
 
 #[derive(Component, Default, Clone)]
@@ -66,6 +73,7 @@ pub fn player_movement(
         &PlayerInput,
         &mut MovementIntent,
         &mut Player,
+        &mut PlayerPosition,
         &mut Velocity,
         &GroundDetection,
         &ClimbDetection,
@@ -79,6 +87,7 @@ pub fn player_movement(
         input,
         mut intent,
         mut player,
+        mut player_position,
         mut velocity,
         ground_detection,
         climb_detection,
@@ -235,12 +244,25 @@ fn update_player_animation(
     }
 }
 
+fn update_player_position(
+    mut query: Query<(&mut PlayerPosition, &Transform), With<Player>>,
+) {
+    for(mut player_position, transform) in query.iter_mut() {
+        //Tracks the player's position using Transform
+        //.translation gives the current position of the Player
+        let player_pos = transform.translation;
+
+        player_position.x = player_pos.x;
+        player_position.y = player_pos.y;
+    }
+}
+
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .register_ldtk_entity::<PlayerBundle>("Player")
-            .add_systems(Update, (player_input, player_movement.after(player_input), update_player_animation.after(player_movement)));
+            .add_systems(Update, (player_input,update_player_position.after(player_input), player_movement.after(update_player_position), update_player_animation.after(player_movement)));
     }
 }
 
