@@ -35,6 +35,9 @@ fn main() {
         .run();
 }
 
+
+/*
+
 // Website Handling
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(start)]
@@ -73,3 +76,5 @@ pub fn main_web() {
 
     web_sys::console::log_1(&"Game initialization complete.".into());
 }
+
+ */
