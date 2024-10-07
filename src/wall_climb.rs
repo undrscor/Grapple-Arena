@@ -83,8 +83,8 @@ pub fn climb_detection(
 }
 
 pub fn update_climbing(
-    mut climb_detectors: Query<&mut crate::wall_climb::ClimbDetection>,
-    climb_sensors: Query<&crate::wall_climb::ClimbSensor, Changed<crate::wall_climb::ClimbSensor>>,
+    mut climb_detectors: Query<&mut ClimbDetection>,
+    climb_sensors: Query<&ClimbSensor, Changed<crate::wall_climb::ClimbSensor>>,
 ) {
     for sensor in &climb_sensors {
         if let Ok(mut climb_detection) = climb_detectors.get_mut(sensor.climb_detection_entity) {

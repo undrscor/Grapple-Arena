@@ -10,6 +10,7 @@ mod walls;
 mod ground_detection;
 mod wall_climb;
 mod animation;
+mod grapple;
 
 use startup::setup;
 
@@ -19,15 +20,16 @@ fn main() {
             DefaultPlugins,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            //RapierDebugRenderPlugin::default(), //for debugging colliders
+            RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
 
         .add_systems(Startup, setup)
         .insert_resource(LevelSelection::index(0))
 
-        //implement player plugin
+        //implement plugins
         .add_plugins(animation::PlayerAnimationPlugin)
         .add_plugins(player::PlayerPlugin)
+        .add_plugins(grapple::GrapplePlugin)
         .add_plugins(walls::WallPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
         .add_plugins(wall_climb::WallClimbPlugin)

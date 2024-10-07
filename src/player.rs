@@ -1,3 +1,4 @@
+use bevy::input::keyboard::KeyboardInput;
 // player.rs
 use crate::animation::*;
 use crate::ground_detection::GroundDetection;
@@ -24,7 +25,7 @@ pub struct PlayerBundle {
     entity_instance: EntityInstance,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Default, Debug, Component)]
+#[derive(Copy, Clone, Default, Debug, Component)]
 pub struct Player {
     pub double_jump: bool,
 }
@@ -42,6 +43,7 @@ pub struct PlayerInput {
     pub jump: bool,
     pub jump_held: bool,
     pub fast_fall: bool,
+    pub grapple: bool,
 }
 
 #[derive(Component, Default, Clone)]
@@ -65,6 +67,7 @@ pub fn player_input(
         input.jump = keyboard_input.just_pressed(KeyCode::Space);
         input.jump_held = keyboard_input.pressed(KeyCode::Space);
         input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
+        input.grapple = keyboard_input.just_pressed(KeyCode::KeyJ);
     }
 }
 
@@ -97,8 +100,6 @@ pub fn player_movement(
         mut sprite,
     ) in query.iter_mut() {
 
-        //idle frame
-        let mut is_idle = true;
         //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
         if input.move_right
         {
@@ -110,7 +111,6 @@ pub fn player_movement(
 
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
             sprite.flip_x = false;
-            is_idle = false;
         } else if input.move_left
         {
             let new_horizontal_force = calc_force_diff(
@@ -121,13 +121,11 @@ pub fn player_movement(
 
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
             sprite.flip_x = true;
-            is_idle = false;
         } else {
             if velocity.linvel.x.abs() > 0.01 {
                 let new_horizontal_force =
                     -velocity.linvel.x;
                 force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
-                is_idle = false;
             }
         }
 
@@ -166,11 +164,6 @@ pub fn player_movement(
 
         // Vertical movement intent
         intent.vertical = velocity.linvel.y;
-
-        //idle
-        if velocity.linvel.x.abs() < 0.01 && velocity.linvel.y.abs() < 0.01 {
-            is_idle = true;
-        }
     }
 }
 
@@ -185,9 +178,9 @@ fn update_player_animation(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut animation_assets: ResMut<AnimationAssets>,
-    mut query: Query<(&mut TextureAtlas, &mut Sprite, &mut Handle<Image>, &Velocity, &MovementIntent,)>,
+    mut query: Query<(&mut TextureAtlas, &mut Handle<Image>, &Velocity, &MovementIntent,)>,
 ) {
-    for (mut texture_atlas, mut sprite, mut texture, velocity, intent) in query.iter_mut() {
+    for (mut texture_atlas, mut texture, velocity, intent) in query.iter_mut() {
         // Determine animation type based on velocity
         let animation_type = if velocity.linvel.y.abs() > 0.1 {
             AnimationType::Jump
@@ -210,7 +203,7 @@ fn update_player_animation(
                 if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
                     timer.reset();
                 }
-                println!("Animation type changed to {:?}", animation_type);
+                //println!("Animation type changed to {:?}", animation_type);
             }
 
             if animation_type != AnimationType::Idle {

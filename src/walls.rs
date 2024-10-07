@@ -160,6 +160,7 @@ pub fn spawn_wall_collisions(
                                 (wall_rect.top as f32 - wall_rect.bottom as f32 + 1.)
                                     * grid_size as f32,
                             ))
+                            .insert(CollisionGroups::new(Group::GROUP_2, Group::ALL))
                             .insert(RigidBody::Fixed)
                             .insert(Friction::new(1.0)) 
                             .insert(Transform::from_xyz(
