@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
-use wasm_bindgen::prelude::*;
+//use wasm_bindgen::prelude::*;
 
 mod startup;
 mod player;

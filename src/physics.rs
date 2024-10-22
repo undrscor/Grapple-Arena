@@ -27,7 +27,7 @@ impl From<&EntityInstance> for PhysicsBundle {
         match entity_instance.identifier.as_ref() {
             "Player" => PhysicsBundle {
                 collider: Collider::cuboid(10., 16.),
-                collision_groups: CollisionGroups::new(Group::GROUP_1, Group::ALL),
+                collision_groups: CollisionGroups::new(Group::GROUP_1, Group::GROUP_2),
                 rigid_body: RigidBody::Dynamic,
                 friction: Friction {
                     coefficient: 0.3,
@@ -49,11 +49,7 @@ impl From<&EntityInstance> for PhysicsBundle {
                 rigid_body: RigidBody::Dynamic,
                 rotation_constraints: LockedAxes::ROTATION_LOCKED_X | LockedAxes::ROTATION_LOCKED_Y,
                 friction: Friction::new(0.0),
-                gravity_scale: GravityScale(200.0),
-                velocity: Velocity {
-                    linvel: Vec2::new(200.0, 200.0),
-                    angvel: 0.0,
-                },
+                gravity_scale: GravityScale(0.0),
                 ..Default::default()
             },
             _ => PhysicsBundle::default(),

@@ -84,7 +84,7 @@ pub fn climb_detection(
 
 pub fn update_climbing(
     mut climb_detectors: Query<&mut ClimbDetection>,
-    climb_sensors: Query<&ClimbSensor, Changed<crate::wall_climb::ClimbSensor>>,
+    climb_sensors: Query<&ClimbSensor, Changed<ClimbSensor>>,
 ) {
     for sensor in &climb_sensors {
         if let Ok(mut climb_detection) = climb_detectors.get_mut(sensor.climb_detection_entity) {
@@ -94,10 +94,10 @@ pub fn update_climbing(
 }
 
 pub struct WallClimbPlugin;
-impl Plugin for crate::wall_climb::WallClimbPlugin {
+impl Plugin for WallClimbPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, crate::wall_climb::spawn_climb_sensor)
-            .add_systems(Update, crate::wall_climb::climb_detection)
-            .add_systems(Update, crate::wall_climb::update_climbing);
+        app.add_systems(Update, spawn_climb_sensor)
+            .add_systems(Update, climb_detection)
+            .add_systems(Update, update_climbing);
     }
 }

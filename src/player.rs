@@ -23,6 +23,7 @@ pub struct PlayerBundle {
     worldly: Worldly,
     #[from_entity_instance]
     entity_instance: EntityInstance,
+
 }
 
 #[derive(Copy, Clone, Default, Debug, Component)]
@@ -44,6 +45,8 @@ pub struct PlayerInput {
     pub jump_held: bool,
     pub fast_fall: bool,
     pub grapple: bool,
+    //pub grapple_held: bool,
+    pub grapple_released: bool,
 }
 
 #[derive(Component, Default, Clone)]
@@ -68,6 +71,8 @@ pub fn player_input(
         input.jump_held = keyboard_input.pressed(KeyCode::Space);
         input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
         input.grapple = keyboard_input.just_pressed(KeyCode::KeyJ);
+        //input.grapple_held = keyboard_input.pressed(KeyCode::KeyJ);
+        input.grapple_released = keyboard_input.just_released(KeyCode::KeyJ);
     }
 }
 
