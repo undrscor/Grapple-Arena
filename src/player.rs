@@ -1,4 +1,3 @@
-use bevy::input::keyboard::KeyboardInput;
 // player.rs
 use crate::animation::*;
 use crate::ground_detection::GroundDetection;
@@ -81,7 +80,6 @@ pub fn player_movement(
         &PlayerInput,
         &mut MovementIntent,
         &mut Player,
-        &mut PlayerPosition,
         &mut Velocity,
         &GroundDetection,
         &ClimbDetection,
@@ -95,7 +93,6 @@ pub fn player_movement(
         input,
         mut intent,
         mut player,
-        mut player_position,
         mut velocity,
         ground_detection,
         climb_detection,
