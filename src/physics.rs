@@ -44,14 +44,6 @@ impl From<&EntityInstance> for PhysicsBundle {
                 // },
                 ..Default::default()
             },
-            "Grapple" => PhysicsBundle {
-                collider: Collider::ball(2.),
-                rigid_body: RigidBody::Dynamic,
-                rotation_constraints: LockedAxes::ROTATION_LOCKED_X | LockedAxes::ROTATION_LOCKED_Y,
-                friction: Friction::new(0.0),
-                gravity_scale: GravityScale(0.0),
-                ..Default::default()
-            },
             _ => PhysicsBundle::default(),
         }
     }

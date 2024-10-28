@@ -26,10 +26,7 @@ pub fn spawn_climb_sensor(
                 ..
             } = cuboid.half_extents();
 
-            //let detector_shape = Collider::cuboid(half_extents_x / 2.0, 2.);
-            //let sensor_translation = Vec3::new(0., -half_extents_y, 0.);
             let detector_shape = Collider::cuboid(half_extents_x/1.5, 1.0);
-            //let sensor_translation = Vec3::new(0., 0., 0.);
 
             commands.entity(entity).with_children(|builder| {
                 builder
@@ -37,7 +34,6 @@ pub fn spawn_climb_sensor(
                     .insert(ActiveEvents::COLLISION_EVENTS)
                     .insert(detector_shape)
                     .insert(Sensor)
-                    //.insert(Transform::from_translation(sensor_translation))
                     .insert(GlobalTransform::default())
                     .insert(ClimbSensor {
                         climb_detection_entity: entity,

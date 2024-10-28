@@ -37,7 +37,7 @@ pub enum HookState {
 pub fn grapple_launch(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    parent_query: Query<(&Transform, &Velocity, &Sprite, &PlayerInput), (With<Player>)>,
+    parent_query: Query<(&Transform, &Velocity, &Sprite, &PlayerInput), With<Player>>,
 ) {
     for (player_transform, player_velocity, player_sprite, input) in parent_query.iter() {
         let direction = if !player_sprite.flip_x { 1.0 } else { -1.0 };
@@ -131,14 +131,13 @@ pub fn update_grapple(
                     );
                 }
             }
-            if player_input.grapple_released || player_input.jump || (state.eq(&HookState::Swinging) && (climb_detection.climbing)) {
+            if player_input.grapple_released || player_input.jump || player_input.grapple_held || (state.eq(&HookState::Swinging) && (climb_detection.climbing)) {
                 commands.entity(player_entity).remove::<ImpulseJoint>();
                 commands.entity(grapple_entity).despawn();
             }
         }
     }
 }
-
 
 pub struct GrapplePlugin;
 impl Plugin for GrapplePlugin {

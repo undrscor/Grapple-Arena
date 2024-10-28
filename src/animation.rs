@@ -5,8 +5,8 @@ use bevy::utils::*;
 #[derive(Clone, Default, Bundle)]
 pub struct AnimationBundle {
     pub animation_type: AnimationType,
-    pub texture_atlas: TextureAtlas,                        // The texture atlas for animations
-    pub sprite: SpriteBundle,                               // Timer to track frame changes
+    pub texture_atlas: TextureAtlas,
+    pub sprite: SpriteBundle,
 }
 
 #[derive(Clone, Component, PartialEq, Eq, Copy, Debug, Hash, Default)]
@@ -60,12 +60,10 @@ fn setup_animation_assets(
         let timer = Timer::from_seconds(frame_duration, TimerMode::Repeating);
         timers.insert(anim_type, timer);
     };
-
     load_animation(AnimationType::Jump, "industrialAssets/6. Character Animations - Free/Anim_Robot_Jump1_v1.1_spritesheet.png".to_string(), 3, 3, 0.1);
     load_animation(AnimationType::Run, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 3, 2, 0.1);
     load_animation(AnimationType::Idle, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
     // Add more animations as needed
-
     commands.insert_resource(AnimationAssets { layouts, textures, timers });
 }
 

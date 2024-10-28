@@ -10,7 +10,6 @@ use bevy_rapier2d::prelude::*;
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     player: Player,
-    player_position: PlayerPosition,
     player_input: PlayerInput,
     #[from_entity_instance]
     physics: PhysicsBundle,
@@ -30,12 +29,6 @@ pub struct Player {
     pub double_jump: bool,
 }
 
-#[derive(Clone, Default, Component)]
-pub struct PlayerPosition {
-    pub x: f32,
-    pub y: f32,
-}
-
 #[derive(Component, Default, Clone)]
 pub struct PlayerInput {
     pub move_left: bool,
@@ -44,7 +37,7 @@ pub struct PlayerInput {
     pub jump_held: bool,
     pub fast_fall: bool,
     pub grapple: bool,
-    //pub grapple_held: bool,
+    pub grapple_held: bool,
     pub grapple_released: bool,
 }
 
@@ -194,7 +187,7 @@ fn update_player_animation(
 
         let layout_handle = animation_assets.get_layout(animation_type).cloned();
         let texture_handle = animation_assets.get_texture(animation_type).cloned();
-
+                //println!("Animation type changed to {:?}", animation_type);
         // Get the layout handle and texture handle for the current animation type
         if let (Some(layout_handle), Some(texture_handle)) = (layout_handle, texture_handle) {
             // If the animation type changed, update the texture atlas layout and texture
@@ -217,18 +210,6 @@ fn update_player_animation(
                         if let Some(layout) = texture_atlases.get(&texture_atlas.layout) {
                             let texture_count = layout.textures.len();
                             texture_atlas.index = (texture_atlas.index + 1) % texture_count;
-
-                            //for custom sizing
-                            // let urect = layout.textures[texture_atlas.index];
-                            // sprite.rect = Some(Rect {
-                            //     min: Vec2::new(urect.min.x as f32, urect.min.y as f32),
-                            //     max: Vec2::new(urect.max.x as f32, urect.max.y as f32),
-                            // });
-
-                            // Ensure the sprite uses the full texture
-                            //sprite.custom_size = Some(Vec2::new(urect.width() as f32, urect.height() as f32));
-
-                            //println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
                         }
                     }
                 } else {
@@ -239,25 +220,12 @@ fn update_player_animation(
     }
 }
 
-fn update_player_position(
-    mut query: Query<(&mut PlayerPosition, &Transform), With<Player>>,
-) {
-    for(mut player_position, transform) in query.iter_mut() {
-        //Tracks the player's position using Transform
-        //.translation gives the current position of the Player
-        let player_pos = transform.translation;
-
-        player_position.x = player_pos.x;
-        player_position.y = player_pos.y;
-    }
-}
-
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .register_ldtk_entity::<PlayerBundle>("Player")
-            .add_systems(Update, (player_input,update_player_position.after(player_input), player_movement.after(update_player_position), update_player_animation.after(player_movement)));
+            .add_systems(Update, (player_input, player_movement.after(player_input), update_player_animation.after(player_movement)));
     }
 }
 
