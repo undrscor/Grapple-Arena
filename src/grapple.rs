@@ -131,7 +131,7 @@ pub fn update_grapple(
                     );
                 }
             }
-            if player_input.grapple_released || player_input.jump || player_input.grapple_held || (state.eq(&HookState::Swinging) && (climb_detection.climbing)) {
+            if player_input.jump || !player_input.grapple_held || (state.eq(&HookState::Swinging) && (climb_detection.climbing)) {
                 commands.entity(player_entity).remove::<ImpulseJoint>();
                 commands.entity(grapple_entity).despawn();
             }

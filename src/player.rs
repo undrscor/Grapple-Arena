@@ -63,8 +63,8 @@ pub fn player_input(
         input.jump_held = keyboard_input.pressed(KeyCode::Space);
         input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
         input.grapple = keyboard_input.just_pressed(KeyCode::KeyJ);
-        //input.grapple_held = keyboard_input.pressed(KeyCode::KeyJ);
-        input.grapple_released = keyboard_input.just_released(KeyCode::KeyJ);
+        input.grapple_held = keyboard_input.pressed(KeyCode::KeyJ);
+        //input.grapple_released = keyboard_input.just_released(KeyCode::KeyJ);
     }
 }
 
@@ -103,7 +103,6 @@ pub fn player_movement(
                 velocity.linvel.x,
                 PLAYER_TOP_SPEED,
             );
-
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
             sprite.flip_x = false;
         } else if input.move_left
