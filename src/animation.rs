@@ -15,6 +15,7 @@ pub enum AnimationType {
     Idle,
     Run,
     Jump,
+    Grapple,
 }
 
 #[derive(Resource)]
@@ -60,9 +61,11 @@ fn setup_animation_assets(
         let timer = Timer::from_seconds(frame_duration, TimerMode::Repeating);
         timers.insert(anim_type, timer);
     };
-    load_animation(AnimationType::Jump, "industrialAssets/6. Character Animations - Free/Anim_Robot_Jump1_v1.1_spritesheet.png".to_string(), 3, 3, 0.1);
-    load_animation(AnimationType::Run, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 3, 2, 0.1);
-    load_animation(AnimationType::Idle, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
+    load_animation(AnimationType::Jump, "industrialAssets/6. Character Animations - Free/man_jump_spritesheet.png".to_string(), 3, 3, 0.1);
+    load_animation(AnimationType::Run, "industrialAssets/6. Character Animations - Free/man_walk_spritesheet (1).png".to_string(), 3, 2, 0.1);
+    load_animation(AnimationType::Idle, "industrialAssets/6. Character Animations - Free/man_jump_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
+    load_animation(AnimationType::Grapple, "industrialAssets/6. Character Animations - Free/man_grapple.png".to_string(), 3, 1, 0.0); // Use a single-frame texture for Idle.
+
     // Add more animations as needed
     commands.insert_resource(AnimationAssets { layouts, textures, timers });
 }

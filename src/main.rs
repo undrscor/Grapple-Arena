@@ -13,6 +13,7 @@ mod animation;
 mod grapple;
 
 use startup::setup;
+use crate::player::{camera_follow_system, Player};
 
 fn main() {
     App::new()
@@ -20,7 +21,7 @@ fn main() {
             DefaultPlugins,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            RapierDebugRenderPlugin::default(), //for debugging colliders
+            //RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
 
         .add_systems(Startup, setup)
