@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.14.2"
-bevy_ecs_ldtk = "0.10.0"
-#bevy_rapier2d = "0.27.0"
+bevy = "*"
+bevy_ecs_ldtk = "*"
+#bevy_rapier2d = "*"
 bevy_rapier2d = { version = "*", features = [ "simd-stable", "debug-render-2d" ] } #for debug-render
+#wasm-bindgen = "*" # ENABLE FOR WEBSITE
+#web-sys = "0.3.70" # ENABLE FOR WEBSITE
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]
@@ -20,3 +22,7 @@ opt-level = 3
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.release]
 codegen-units = 1
+
+#[target.'cfg(target_arch = "wasm32")'.dependencies] # ENABLE FOR WEBSITE
+#console_error_panic_hook = "0.1.6" # ENABLE FOR WEBSITE
+#wasm-bindgen = "0.2.73" # ENABLE FOR WEBSITE

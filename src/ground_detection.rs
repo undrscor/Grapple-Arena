@@ -89,7 +89,6 @@ pub fn update_on_ground(
 }
 
 pub struct GroundDetectionPlugin;
-
 impl Plugin for GroundDetectionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_ground_sensor)

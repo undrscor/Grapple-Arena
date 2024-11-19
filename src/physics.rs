@@ -1,7 +1,7 @@
+//physics.rs
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
-
 
 //physics system implementation, documentation at https://rapier.rs/docs/
 #[derive(Default, Bundle, Clone)]
@@ -11,12 +11,14 @@ pub struct PhysicsBundle {
     //adds collider, velocity, locked rotation option, gravity, friction
     //pub mass: MassProperties,
     pub collider: Collider,
+    pub collision_groups: CollisionGroups,
     pub velocity: Velocity,
     pub force: ExternalForce,
     pub rotation_constraints: LockedAxes,
     pub gravity_scale: GravityScale,
     pub friction: Friction,
-    pub linear_damping: Damping
+    pub linear_damping: Damping,
+    //pub joint: RevoluteJoint,
 }
 
 //implements physics bundle, using "from" conversion for different entities
@@ -25,6 +27,7 @@ impl From<&EntityInstance> for PhysicsBundle {
         match entity_instance.identifier.as_ref() {
             "Player" => PhysicsBundle {
                 collider: Collider::cuboid(10., 16.),
+                collision_groups: CollisionGroups::new(Group::GROUP_1, Group::GROUP_2),
                 rigid_body: RigidBody::Dynamic,
                 friction: Friction {
                     coefficient: 0.3,
@@ -36,6 +39,9 @@ impl From<&EntityInstance> for PhysicsBundle {
                     linear_damping: 0.0,
                     angular_damping: 0.0,
                 },
+                // joint: RevoluteJoint {
+                //     data: Default::default(),
+                // },
                 ..Default::default()
             },
             _ => PhysicsBundle::default(),

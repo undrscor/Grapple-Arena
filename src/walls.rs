@@ -42,7 +42,6 @@ pub fn spawn_wall_collisions(
         right: i32,
     }
 
-
     /// A simple rectangle type representing a wall of any size
     struct Rect {
         left: i32,
@@ -161,6 +160,7 @@ pub fn spawn_wall_collisions(
                                 (wall_rect.top as f32 - wall_rect.bottom as f32 + 1.)
                                     * grid_size as f32,
                             ))
+                            .insert(CollisionGroups::new(Group::GROUP_2, Group::ALL))
                             .insert(RigidBody::Fixed)
                             .insert(Friction::new(1.0)) 
                             .insert(Transform::from_xyz(
@@ -176,9 +176,7 @@ pub fn spawn_wall_collisions(
     }
 }
 
-
 pub struct WallPlugin;
-
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_wall_collisions)
