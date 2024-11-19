@@ -5,16 +5,17 @@ use bevy::utils::*;
 #[derive(Clone, Default, Bundle)]
 pub struct AnimationBundle {
     pub animation_type: AnimationType,
-    pub texture_atlas: TextureAtlas,                        // The texture atlas for animations
-    pub sprite: SpriteBundle,     // Timer to track frame changes
+    pub texture_atlas: TextureAtlas,
+    pub sprite: SpriteBundle,
 }
 
-#[derive(Clone, Component, Copy, Debug, PartialEq, Eq, Hash, Default)]
+#[derive(Clone, Component, PartialEq, Eq, Copy, Debug, Hash, Default)]
 pub enum AnimationType {
     #[default]
+    Idle,
     Run,
     Jump,
-    Idle,
+    Grapple,
 }
 
 #[derive(Resource)]
@@ -23,7 +24,6 @@ pub struct AnimationAssets {
     textures: HashMap<AnimationType, Handle<Image>>,
     timers: HashMap<AnimationType, Timer>,
 }
-
 impl AnimationAssets {
     pub(crate) fn get_layout(&self, animation_type: AnimationType) -> Option<&Handle<TextureAtlasLayout>> {
         self.layouts.get(&animation_type)
@@ -37,7 +37,6 @@ impl AnimationAssets {
         self.timers.get_mut(&animation_type)
     }
 }
-
 
 // This system should be run during startup to initialize the AnimationAtlases resource
 fn setup_animation_assets(
@@ -62,25 +61,19 @@ fn setup_animation_assets(
         let timer = Timer::from_seconds(frame_duration, TimerMode::Repeating);
         timers.insert(anim_type, timer);
     };
+    load_animation(AnimationType::Jump, "industrialAssets/6. Character Animations - Free/man_jump_spritesheet.png".to_string(), 3, 3, 0.1);
+    load_animation(AnimationType::Run, "industrialAssets/6. Character Animations - Free/man_walk_spritesheet (1).png".to_string(), 3, 2, 0.1);
+    load_animation(AnimationType::Idle, "industrialAssets/6. Character Animations - Free/man_jump_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
+    load_animation(AnimationType::Grapple, "industrialAssets/6. Character Animations - Free/man_grapple.png".to_string(), 3, 1, 0.0); // Use a single-frame texture for Idle.
 
-    load_animation(AnimationType::Jump, "industrialAssets/6. Character Animations - Free/Anim_Robot_Jump1_v1.1_spritesheet.png".to_string(), 3, 3, 0.1);
-    load_animation(AnimationType::Run, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 3, 2, 0.1);
-    load_animation(AnimationType::Idle, "industrialAssets/6. Character Animations - Free/Anim_Robot_Walk1_v1.1_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
     // Add more animations as needed
-
     commands.insert_resource(AnimationAssets { layouts, textures, timers });
 }
 
-
 pub struct PlayerAnimationPlugin;
-
 impl Plugin for PlayerAnimationPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, setup_animation_assets);
     }
 }
-
-
-
-

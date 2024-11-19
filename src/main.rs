@@ -9,8 +9,10 @@ mod walls;
 mod ground_detection;
 mod wall_climb;
 mod animation;
+mod grapple;
 
 use startup::setup;
+use crate::player::{camera_follow_system, Player};
 
 fn main() {
     App::new()
@@ -18,13 +20,60 @@ fn main() {
             DefaultPlugins,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            // RapierDebugRenderPlugin::default(), //for debugging colliders
+            // RapierDebugRenderPlugin::default(), // for debugging colliders
         ))
+        .add_plugins(player::PlayerPlugin)
+
+        // Configure LDtk settings to load all levels with their neighbors
+        .insert_resource(LdtkSettings {
+            level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
+                load_level_neighbors: true,
+            },
+            ..Default::default()
+        })
+        // Optionally, set the initial level
+        .insert_resource(LevelSelection::Identifier("Level_0".to_string())) // Starting level identifier
+        .add_systems(Startup, setup)
+
+        // Add plugins and systems
+        .add_plugins(animation::PlayerAnimationPlugin)
+        .add_plugins(grapple::GrapplePlugin)
+        .add_plugins(walls::WallPlugin)
+        .add_plugins(ground_detection::GroundDetectionPlugin)
+        .add_plugins(wall_climb::WallClimbPlugin)
+
+        .run();
+}
+
+
+
+/*
+
+// Website Handling
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen(start)]
+pub fn main_web() {
+    console_error_panic_hook::set_once();  // This will log any panics to the browser console
+
+    web_sys::console::log_1(&"Bevy WebAssembly - Grapple Arena - starting...".into());
+
+    // Initialize
+    App::new()
+        .add_plugins(
+            DefaultPlugins.set(
+                WindowPlugin {
+                    primary_window: Some(Window {
+                        canvas: Some("#bevy_canvas".into()),
+                        ..default()
+                    }),
+                    ..default()
+                }))
+
+        .add_plugins(LdtkPlugin)
+        .add_plugins(RapierPhysicsPlugin::<()>::default())
 
         .add_systems(Startup, setup)
         .insert_resource(LevelSelection::index(0))
-
-        //.register_ldtk_entity::<PlayerBundle>("Player")
 
         //implement player plugin
         .add_plugins(animation::PlayerAnimationPlugin)
@@ -32,12 +81,11 @@ fn main() {
         .add_plugins(walls::WallPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
         .add_plugins(wall_climb::WallClimbPlugin)
-
-
-        //player tests:
-        //.add_systems(Update, player::reader)
-        //.add_systems(Update, player::react_to_player_changing)
+        .add_plugins(grappling::GrapplingPlugin)
 
         .run();
 
+    web_sys::console::log_1(&"Game initialization complete.".into());
 }
+
+ */

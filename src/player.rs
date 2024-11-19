@@ -1,249 +1,301 @@
-// player.rs
-use crate::animation::*;
-use crate::ground_detection::GroundDetection;
-use crate::physics::PhysicsBundle;
-use crate::wall_climb::ClimbDetection;
-use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::prelude::*;
+    // player.rs
+    use crate::animation::*;
+    use crate::ground_detection::GroundDetection;
+    use crate::physics::PhysicsBundle;
+    use crate::wall_climb::ClimbDetection;
+    use bevy::prelude::*;
+    use bevy_ecs_ldtk::prelude::*;
+    use bevy_rapier2d::prelude::*;
+    use crate::startup::{setup, LevelBounds};
 
+    #[derive(Clone, Default, Bundle, LdtkEntity)]
+    pub struct PlayerBundle {
+        player: Player,
+        player_input: PlayerInput,
+        #[from_entity_instance]
+        physics: PhysicsBundle,
+        animation_bundle: AnimationBundle,
+        movement_intent: MovementIntent,
+        ground_detection: GroundDetection,
+        climb_detection: ClimbDetection,
+        #[worldly]
+        worldly: Worldly,
+        #[from_entity_instance]
+        entity_instance: EntityInstance,
 
-#[derive(Clone, Default, Bundle, LdtkEntity)]
-pub struct PlayerBundle {
-    player: Player,
-    player_input: PlayerInput,
-    #[from_entity_instance]
-    physics: PhysicsBundle,
-    animation_bundle: AnimationBundle,
-    movement_intent: MovementIntent,
-    ground_detection: GroundDetection,
-    climb_detection: ClimbDetection,
-    #[worldly]
-    worldly: Worldly,
-    #[from_entity_instance]
-    entity_instance: EntityInstance,
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Default, Debug, Component)]
-pub struct Player {
-    pub double_jump: bool,
-}
-
-#[derive(Component, Default, Clone)]
-pub struct PlayerInput {
-    pub move_left: bool,
-    pub move_right: bool,
-    pub jump: bool,
-    pub jump_held: bool,
-    pub fast_fall: bool,
-}
-
-#[derive(Component, Default, Clone)]
-pub struct MovementIntent {
-    pub horizontal: f32,
-    pub vertical: f32,
-    pub wants_to_jump: bool,
-}
-
-const PLAYER_ACCELERATION_MULTIPLIER: f32 = 400.0f32; //for force multiplier
-const PLAYER_TOP_SPEED: f32 = 250.0;
-const PLAYER_JUMP_STRENGTH: f32 = 270.0;
-
-pub fn player_input(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<&mut PlayerInput, With<Player>>,
-) {
-    for mut input in query.iter_mut() {
-        input.move_left = keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft);
-        input.move_right = keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
-        input.jump = keyboard_input.just_pressed(KeyCode::Space);
-        input.jump_held = keyboard_input.pressed(KeyCode::Space);
-        input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
     }
-}
 
-pub fn player_movement(
-    mut query: Query<(
-        &PlayerInput,
-        &mut MovementIntent,
-        &mut Player,
-        &mut Velocity,
-        &GroundDetection,
-        &ClimbDetection,
-        &mut ExternalForce,
-        &mut GravityScale,
-        &mut Damping,
-        &mut Sprite,
-    )>,
-) {
-    for (
-        input,
-        mut intent,
-        mut player,
-        mut velocity,
-        ground_detection,
-        climb_detection,
-        mut force,
-        mut gravity,
-        mut damping,
-        mut sprite,
-    ) in query.iter_mut() {
-
-        //idle frame
-        let mut is_idle = true;
-        //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
-        if input.move_right
-        {
-            let new_horizontal_force = calc_force_diff(
-                intent.horizontal,
-                velocity.linvel.x,
-                PLAYER_TOP_SPEED,
-            );
-
-            force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
-            sprite.flip_x = false;
-            is_idle = false;
-        } else if input.move_left
-        {
-            let new_horizontal_force = calc_force_diff(
-                intent.horizontal,
-                velocity.linvel.x,
-                -PLAYER_TOP_SPEED,
-            );
-
-            force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
-            sprite.flip_x = true;
-            is_idle = false;
-        } else {
-            if velocity.linvel.x.abs() > 0.01 {
-                let new_horizontal_force =
-                    -velocity.linvel.x;
-                force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
-                is_idle = false;
-            }
-        }
-
-        // Handle jumping
-        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || !player.double_jump);
-        if intent.wants_to_jump {
-            if !ground_detection.on_ground && !climb_detection.climbing {
-                player.double_jump = true;
-            }
-            velocity.linvel.y = PLAYER_JUMP_STRENGTH;
-        }
-
-        // Reset double jump if on ground or climbing
-        if ground_detection.on_ground || climb_detection.climbing {
-            player.double_jump = false;
-        }
-
-        // Adjust jump height
-        if input.jump_held && velocity.linvel.y > 0.0 {
-            gravity.0 = 55.0;
-        } else {
-            gravity.0 = 100.0;
-        }
-
-        // Fast fall
-        if input.fast_fall {
-            gravity.0 = 200.0;
-        }
-
-        // Climbing
-        if climb_detection.climbing {
-            damping.linear_damping = if input.jump_held { 0.0 } else { 15.0 };
-        } else {
-            damping.linear_damping = 0.0;
-        }
-
-        // Vertical movement intent
-        intent.vertical = velocity.linvel.y;
-
-        //idle
-        if velocity.linvel.x.abs() < 0.01 && velocity.linvel.y.abs() < 0.01 {
-            is_idle = true;
-        }
+    #[derive(Copy, Clone, Default, Debug, Component)]
+    pub struct Player {
+        pub double_jump: bool,
     }
-}
 
-fn calc_force_diff(input: f32, current_velocity: f32, target_velocity: f32) -> f32 {
-    let target_speed = target_velocity * input.signum();
-    let diff_to_make_up = target_speed - current_velocity;
-    diff_to_make_up * 2.0
-}
+    #[derive(Component, Default, Clone)]
+    pub struct PlayerInput {
+        pub move_left: bool,
+        pub move_right: bool,
+        pub jump: bool,
+        pub jump_held: bool,
+        pub fast_fall: bool,
+        pub grapple: bool,
+        pub grapple_held: bool,
+        pub grapple_released: bool,
+    }
+
+    #[derive(Component, Default, Clone)]
+    pub struct MovementIntent {
+        pub horizontal: f32,
+        pub vertical: f32,
+        pub wants_to_jump: bool,
+    }
+
+    const PLAYER_ACCELERATION_MULTIPLIER: f32 = 400.0f32; //for force multiplier
+    const PLAYER_TOP_SPEED: f32 = 250.0;
+    const PLAYER_JUMP_STRENGTH: f32 = 270.0;
 
 
-fn update_player_animation(
-    time: Res<Time>,
-    texture_atlases: Res<Assets<TextureAtlasLayout>>,
-    mut animation_assets: ResMut<AnimationAssets>,
-    mut query: Query<(&mut TextureAtlas, &mut Sprite, &mut Handle<Image>, &Velocity, &MovementIntent,)>,
-) {
-    for (mut texture_atlas, mut sprite, mut texture, velocity, intent) in query.iter_mut() {
-        // Determine animation type based on velocity
-        let animation_type = if velocity.linvel.y.abs() > 0.1 {
-            AnimationType::Jump
-        } else if velocity.linvel.x.abs() > 0.1 {
-            AnimationType::Run
-        } else {
-            AnimationType::Idle
-        };
+    const CAMERA_LERP_SPEED: f32 = 0.1;
 
-        let layout_handle = animation_assets.get_layout(animation_type).cloned();
-        let texture_handle = animation_assets.get_texture(animation_type).cloned();
-
-        // Get the layout handle and texture handle for the current animation type
-        if let (Some(layout_handle), Some(texture_handle)) = (layout_handle, texture_handle) {
-            // If the animation type changed, update the texture atlas layout and texture
-            if texture_atlas.layout != layout_handle {
-                texture_atlas.layout = layout_handle.clone();
-                texture_atlas.index = 0; // Reset to first frame of new animation
-                *texture = texture_handle.clone(); // Update the texture
-                if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
-                    timer.reset();
+    pub fn camera_follow_system(
+        player_query: Query<&Transform, With<Player>>,
+        mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+        mut has_snapped: Local<bool>, // Ensures the camera snaps only once
+    ) {
+        if let Ok(player_transform) = player_query.get_single() {
+            if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+                if !*has_snapped {
+                    // Snap camera to player's position on the first frame
+                    camera_transform.translation.x = player_transform.translation.x;
+                    camera_transform.translation.y = player_transform.translation.y;
+                    *has_snapped = true; // Mark as snapped
+                } else {
+                    // Smoothly follow the player using lerp
+                    camera_transform.translation.x +=
+                        (player_transform.translation.x - camera_transform.translation.x)
+                            * CAMERA_LERP_SPEED;
+                    camera_transform.translation.y +=
+                        (player_transform.translation.y - camera_transform.translation.y)
+                            * CAMERA_LERP_SPEED;
                 }
-                println!("Animation type changed to {:?}", animation_type);
+            }
+        }
+    }
+
+
+
+
+    pub fn player_input(
+        keyboard_input: Res<ButtonInput<KeyCode>>,
+        mut query: Query<&mut PlayerInput, With<Player>>,
+    ) {
+        for mut input in query.iter_mut() {
+            input.move_left = keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft);
+            input.move_right = keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
+            input.jump = keyboard_input.just_pressed(KeyCode::Space);
+            input.jump_held = keyboard_input.pressed(KeyCode::Space);
+            input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
+            input.grapple = keyboard_input.just_pressed(KeyCode::KeyJ);
+            input.grapple_held = keyboard_input.pressed(KeyCode::KeyJ);
+            //input.grapple_released = keyboard_input.just_released(KeyCode::KeyJ);
+        }
+    }
+
+    pub fn player_movement(
+        mut query: Query<(
+            &PlayerInput,
+            &mut MovementIntent,
+            &mut Player,
+            &mut Velocity,
+            &GroundDetection,
+            &ClimbDetection,
+            &mut ExternalForce,
+            &mut GravityScale,
+            &mut Damping,
+            &mut Sprite,
+        )>,
+    ) {
+        for (
+            input,
+            mut intent,
+            mut player,
+            mut velocity,
+            ground_detection,
+            climb_detection,
+            mut force,
+            mut gravity,
+            mut damping,
+            mut sprite,
+        ) in query.iter_mut() {
+
+            //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
+            if input.move_right
+            {
+                let new_horizontal_force = calc_force_diff(
+                    intent.horizontal,
+                    velocity.linvel.x,
+                    PLAYER_TOP_SPEED,
+                );
+                force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                sprite.flip_x = false;
+            } else if input.move_left
+            {
+                let new_horizontal_force = calc_force_diff(
+                    intent.horizontal,
+                    velocity.linvel.x,
+                    -PLAYER_TOP_SPEED,
+                );
+
+                force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                sprite.flip_x = true;
+            } else {
+                if velocity.linvel.x.abs() > 0.01 {
+                    let new_horizontal_force =
+                        -velocity.linvel.x;
+                    force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
+                }
             }
 
-            if animation_type != AnimationType::Idle {
-                // Animate sprite
-                if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
-                    timer.tick(time.delta());
-                    //println!("Timer: {:?}, Finished: {}", timer, timer.just_finished());
-                    if timer.just_finished() {
-                        if let Some(layout) = texture_atlases.get(&texture_atlas.layout) {
-                            let texture_count = layout.textures.len();
-                            texture_atlas.index = (texture_atlas.index + 1) % texture_count;
+            // Handle jumping
+            intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || !player.double_jump);
+            if intent.wants_to_jump {
+                if !ground_detection.on_ground && !climb_detection.climbing {
+                    player.double_jump = true;
+                }
+                velocity.linvel.y = PLAYER_JUMP_STRENGTH;
+            }
 
-                            //for custom sizing
-                            // let urect = layout.textures[texture_atlas.index];
-                            // sprite.rect = Some(Rect {
-                            //     min: Vec2::new(urect.min.x as f32, urect.min.y as f32),
-                            //     max: Vec2::new(urect.max.x as f32, urect.max.y as f32),
-                            // });
+            // Reset double jump if on ground or climbing
+            if ground_detection.on_ground || climb_detection.climbing {
+                player.double_jump = false;
+            }
 
-                            // Ensure the sprite uses the full texture
-                            //sprite.custom_size = Some(Vec2::new(urect.width() as f32, urect.height() as f32));
+            // Adjust jump height
+            if input.jump_held && velocity.linvel.y > 0.0 {
+                gravity.0 = 55.0;
+            } else {
+                gravity.0 = 100.0;
+            }
 
-                            //println!("Next texture! Type: {:?}, Index: {}, Rect: {:?}", animation_type, texture_atlas.index, sprite.rect);
+            // Fast fall
+            if input.fast_fall {
+                gravity.0 = 200.0;
+            }
+
+            // Climbing
+            if climb_detection.climbing {
+                damping.linear_damping = if input.jump_held { 0.0 } else { 15.0 };
+            } else {
+                damping.linear_damping = 0.0;
+            }
+
+            // Vertical movement intent
+            intent.vertical = velocity.linvel.y;
+        }
+    }
+
+    fn calc_force_diff(input: f32, current_velocity: f32, target_velocity: f32) -> f32 {
+        let target_speed = target_velocity * input.signum();
+        let diff_to_make_up = target_speed - current_velocity;
+        diff_to_make_up * 2.0
+    }
+
+
+    fn update_player_animation(
+        time: Res<Time>,
+        texture_atlases: Res<Assets<TextureAtlasLayout>>,
+        mut animation_assets: ResMut<AnimationAssets>,
+        mut query: Query<(
+            &mut TextureAtlas,
+            &mut Handle<Image>,
+            &Velocity,
+            &MovementIntent,
+            &PlayerInput, // Added to check grappling input
+        )>,
+    ) {
+        for (mut texture_atlas, mut texture, velocity, intent, input) in query.iter_mut() {
+            // Determine animation type based on state
+            let animation_type = if input.grapple_held {
+                // If grapple is active
+                AnimationType::Grapple
+            } else if velocity.linvel.y.abs() > 0.1 {
+                // If the player is jumping or falling
+                AnimationType::Jump
+            } else if velocity.linvel.x.abs() > 0.1 {
+                // If the player is running
+                AnimationType::Run
+            } else {
+                // Default to Idle animation
+                AnimationType::Idle
+            };
+
+            // Fetch layout and texture for the current animation type
+            let layout_handle = animation_assets.get_layout(animation_type).cloned();
+            let texture_handle = animation_assets.get_texture(animation_type).cloned();
+
+            // Ensure the layout and texture are updated for the current animation
+            if let (Some(layout_handle), Some(texture_handle)) = (layout_handle, texture_handle) {
+                if texture_atlas.layout != layout_handle {
+                    // Change animation if necessary
+                    texture_atlas.layout = layout_handle.clone();
+                    texture_atlas.index = 0; // Start at the first frame
+                    *texture = texture_handle.clone(); // Update the texture
+                    if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
+                        timer.reset();
+                    }
+                }
+
+                // Animate sprite frames if not idle
+                if animation_type != AnimationType::Idle {
+                    if let Some(timer) = animation_assets.get_timer_mut(animation_type) {
+                        timer.tick(time.delta());
+                        if timer.just_finished() {
+                            if let Some(layout) = texture_atlases.get(&texture_atlas.layout) {
+                                let texture_count = layout.textures.len();
+                                texture_atlas.index = (texture_atlas.index + 1) % texture_count;
+                            }
                         }
                     }
-                } else {
-                    println!("Failed to get layout or texture handle for {:?}", animation_type);
                 }
+            } else {
+                // Log if animation assets are missing
+                println!("Missing animation assets for {:?}", animation_type);
             }
         }
     }
-}
+    pub fn startup_camera_positioning(
+        player_query: Query<&Transform, With<Player>>,
+        mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+        mut has_run: Local<bool>, // Ensures the system runs only once
+    ) {
+        if *has_run {
+            return; // Skip if the system has already executed
+        }
 
-
-pub struct PlayerPlugin;
-
-impl Plugin for PlayerPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .register_ldtk_entity::<PlayerBundle>("Player")
-            .add_systems(Update, (player_input, player_movement.after(player_input), update_player_animation.after(player_movement)));
+        if let Ok(player_transform) = player_query.get_single() {
+            if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+                // Snap camera to player's initial position
+                camera_transform.translation.x = player_transform.translation.x;
+                camera_transform.translation.y = player_transform.translation.y;
+                *has_run = true; // Mark as executed
+            }
+        }
     }
-}
+
+    pub struct PlayerPlugin;
+
+    impl Plugin for PlayerPlugin {
+        fn build(&self, app: &mut App) {
+            app.register_ldtk_entity::<PlayerBundle>("Player")
+                .add_systems(
+                    Update,
+                    (
+                        player_input,
+                        player_movement.after(player_input),
+                        update_player_animation.after(player_movement),
+                        camera_follow_system, // Includes snapping and continuous follow
+                    ),
+                );
+        }
+    }
+
 
