@@ -26,6 +26,12 @@ fn main() {
 
         .add_systems(Startup, setup)
         .insert_resource(LevelSelection::index(0))
+        .insert_resource(LdtkSettings {
+            level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
+                load_level_neighbors: true
+            },
+            ..Default::default()
+        })
 
         //implement plugins
         .add_plugins(animation::PlayerAnimationPlugin)
