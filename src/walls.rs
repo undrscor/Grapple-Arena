@@ -10,6 +10,7 @@ pub struct WallBundle {
     wall: Wall,
 }
 
+
 /// Spawns heron collisions for the walls of a level
 ///
 /// You could just insert a ColliderBundle into the WallBundle,
@@ -176,10 +177,12 @@ pub fn spawn_wall_collisions(
     }
 }
 
+
 pub struct WallPlugin;
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_wall_collisions)
             .register_ldtk_int_cell::<WallBundle>(1); //wall
+            //.register_ldtk_int_cell::<WallBundle>(2); //lava
     }
 }

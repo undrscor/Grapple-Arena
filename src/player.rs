@@ -5,7 +5,6 @@ use crate::physics::PhysicsBundle;
 use crate::wall_climb::ClimbDetection;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy_ecs_ldtk::systems::process_ldtk_assets;
 use bevy_rapier2d::prelude::*;
 //use crate::startup::{setup, LevelBounds};
 

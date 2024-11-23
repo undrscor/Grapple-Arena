@@ -12,6 +12,7 @@ mod ground_detection;
 mod wall_climb;
 mod animation;
 mod grapple;
+mod lava;
 
 use startup::setup;
 use crate::player::{camera_follow_system, Player};
@@ -25,7 +26,7 @@ fn main() {
             }),
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            //RapierDebugRenderPlugin::default(), //for debugging colliders
+            RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
 
         .add_systems(Startup, setup)
@@ -42,6 +43,7 @@ fn main() {
         .add_plugins(player::PlayerPlugin)
         .add_plugins(grapple::GrapplePlugin)
         .add_plugins(walls::WallPlugin)
+        .add_plugins(lava::LavaPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
         .add_plugins(wall_climb::WallClimbPlugin)
 
