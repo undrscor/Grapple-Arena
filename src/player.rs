@@ -11,6 +11,7 @@ use bevy_rapier2d::prelude::*;
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     player: Player,
+    //can_grapple: bool,
     player_input: PlayerInput,
     #[from_entity_instance]
     physics: PhysicsBundle,
@@ -276,9 +277,11 @@ fn update_player_animation(
 }
 
 pub fn reset_position(mut transform: Transform) -> Transform {
-    transform.translation = Vec3::new(512.0, -344.0, 0.0);
+    transform.translation = Vec3::new(512.0, -344.0, 10.0);
     transform
 }
+
+
 
 
 pub struct PlayerPlugin;

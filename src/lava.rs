@@ -72,17 +72,21 @@ fn detect_lava(
 
     if is_in_lava && !is_burning {
         // Player just entered lava
+        let burning_effect = BurningEffect {
+            original_color: sprite.color,
+            timer: Timer::from_seconds(0.1, TimerMode::Repeating),
+        };
         commands.entity(player_entity)
             .insert(LavaContact::default())
-            .insert(BurningEffect::default());
+            .insert(burning_effect);
     } else if !is_in_lava && is_burning {
         // Player just left lava
         if let Ok(burning) = burning_query.get(player_entity) {
             sprite.color = Color::WHITE;
+            commands.entity(player_entity)
+                .remove::<LavaContact>()
+                .remove::<BurningEffect>();
         }
-        commands.entity(player_entity)
-            .remove::<LavaContact>()
-            .remove::<BurningEffect>();
     }
 }
 
@@ -90,48 +94,57 @@ fn detect_lava(
 fn check_lava_timer(
     time: Res<Time>,
     mut commands: Commands,
-    mut player_query: Query<(Entity, &mut Transform, &mut Velocity, &mut LavaContact), With<Player>>,
+    mut player_query: Query<(Entity, &mut Transform, &mut Velocity, &mut LavaContact, &mut Sprite, Option<&BurningEffect>), With<Player>>,
 ) {
-    for (entity, mut transform, mut velocity, mut contact) in player_query.iter_mut() {
+    for (entity, mut transform, mut velocity, mut contact, mut sprite, burning_effect) in player_query.iter_mut() {
         contact.timer.tick(time.delta());
 
         if contact.timer.just_finished() {
+            // Restore original color before resetting position
+            if let Some(burning) = burning_effect {
+                sprite.color = burning.original_color;
+            }
+
             // Respawn after 1 second
             *transform = reset_position(transform.clone());
             velocity.linvel = Vec2::ZERO;
 
             // Remove the contact timer
-            commands.entity(entity).remove::<LavaContact>();
+            commands.entity(entity).remove::<LavaContact>().remove::<BurningEffect>();
         }
     }
 }
 
 fn burning_effect(
     time: Res<Time>,
-    mut query: Query<(&mut Sprite, &mut BurningEffect)>,
+    mut query: Query<(&mut Sprite, &mut BurningEffect, Has<LavaContact>)>,
 ) {
-    for (mut sprite, mut effect) in query.iter_mut() {
+    for (mut sprite, mut effect, has_contact) in query.iter_mut() {
+        if !has_contact {
+            sprite.color = effect.original_color;
+            continue;
+        }
         effect.timer.tick(time.delta());
         if effect.timer.just_finished() {
             // Toggle between red and original color
-            if sprite.color == Color::srgb(1.0,0.0,0.0) {
-                sprite.color = Color::WHITE;
+            sprite.color = if sprite.color == Color::srgb(1.0, 0.0, 0.0) {
+                effect.original_color
             } else {
-                sprite.color = Color::srgb(1.0,0.0,0.0);
-            }
+                Color::srgb(1.0, 0.0, 0.0)
+            };
         }
     }
 }
 
-fn cleanup_burning_effect(
-    mut commands: Commands,
-    mut query: Query<(Entity, &mut Sprite, &BurningEffect), Without<LavaContact>>,
-) {
-    for (entity, mut sprite, burning) in query.iter_mut() {
-        sprite.color = burning.original_color;
-        commands.entity(entity).remove::<BurningEffect>();
-    }
-}
+// fn cleanup_burning_effect(
+//     mut commands: Commands,
+//     mut query: Query<(Entity, &mut Sprite, &BurningEffect), Without<LavaContact>>,
+// ) {
+//     for (entity, mut sprite, burning) in query.iter_mut() {
+//         sprite.color = burning.original_color;
+//         commands.entity(entity).remove::<BurningEffect>();
+//     }
+// }
 
 
 pub struct LavaPlugin;
@@ -142,7 +155,7 @@ impl Plugin for LavaPlugin {
             detect_lava,
             check_lava_timer.after(detect_lava),
             burning_effect,
-            cleanup_burning_effect.after(burning_effect),
+            //cleanup_burning_effect.after(burning_effect),
         )).register_ldtk_int_cell::<LavaBundle>(2);
     }
 }
