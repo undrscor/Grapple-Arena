@@ -49,19 +49,30 @@ impl From<&EntityInstance> for PhysicsBundle {
     }
 }
 
-//sensor system (occurs when objects overlap, could use later)
-// #[derive(Default, Bundle)]
-// pub struct SensorBundle {
-//     pub collider: Collider,
-//     pub sensor: Sensor,
-//     pub active_events: ActiveEvents,
-//     pub rotation_constraints: LockedAxes,
-// }
-//
-// impl From<IntGridCell> for SensorBundle {
-//     fn from(int_grid_cell: IntGridCell) -> SensorBundle {
-//         let rotation_constraints = LockedAxes::ROTATION_LOCKED;
-//
-//         SensorBundle::default()
-//     }
-// }
+
+//sensor system for lava blocks
+#[derive(Clone, Default, Bundle, LdtkIntCell)]
+pub struct SensorBundle {
+    pub collider: Collider,
+    pub sensor: Sensor,
+    pub active_events: ActiveEvents,
+    pub rotation_constraints: LockedAxes,
+}
+
+impl From<IntGridCell> for SensorBundle {
+    fn from(int_grid_cell: IntGridCell) -> SensorBundle {
+        let rotation_constraints = LockedAxes::ROTATION_LOCKED;
+
+        // ladder
+        if int_grid_cell.value == 2 {
+            SensorBundle {
+                collider: Collider::cuboid(16., 16.),
+                sensor: Sensor,
+                rotation_constraints,
+                active_events: ActiveEvents::COLLISION_EVENTS,
+            }
+        } else {
+            SensorBundle::default()
+        }
+    }
+}

@@ -1,30 +1,17 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_kira_audio::prelude::*;
+use bevy_kira_audio::prelude::AudioSource;
 
 
-#[derive(Resource)]
-pub struct LevelBounds {
-    pub width: f32,
-    pub height: f32,
-    pub padding_x: f32,
-    pub padding_y: f32,
-}
-pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Insert LevelBounds resource
-    commands.insert_resource(LevelBounds {
-        width: 1024.0, // Default values
-        height: 712.0,
-        padding_x: 0.0, //250.0
-        padding_y: 0.0, //200.0
-    });
-
+pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     // Spawn a zoomed-in camera
     commands.spawn(Camera2dBundle {
         projection: OrthographicProjection {
-            scale: 0.3, // Adjust zoom level
+            scale: 0.5,
             ..Default::default()
         },
-        transform: Transform::from_xyz(0.0, 0.0, 999.9), // Set z to render above everything else
+        transform: Transform::from_xyz(0.0, 0.0, 999.9),
         ..Default::default()
     });
 
@@ -34,6 +21,8 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..Default::default()
     });
 
+    // Play background music
+    let music: Handle<AudioSource> = asset_server.load("DK-grapple-arena.ogg");
+    info!("Loaded music: {:?}", music);
+    audio.play(music).looped().with_volume((0.8)); // Play the audio in a loop
 }
-
-

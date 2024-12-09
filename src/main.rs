@@ -1,6 +1,9 @@
+use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use bevy_asset_loader::prelude::*;
+use bevy_kira_audio::AudioPlugin;
 
 mod startup;
 mod player;
@@ -10,6 +13,9 @@ mod ground_detection;
 mod wall_climb;
 mod animation;
 mod grapple;
+mod lava;
+mod levels;
+mod collectibles;
 
 use startup::setup;
 use crate::player::{camera_follow_system, Player};
@@ -17,75 +23,36 @@ use crate::player::{camera_follow_system, Player};
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins,
+            DefaultPlugins.set(AssetPlugin {
+                meta_check: AssetMetaCheck::Never,
+                ..default()
+            }),
+            AudioPlugin,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            // RapierDebugRenderPlugin::default(), // for debugging colliders
+            RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
-        .add_plugins(player::PlayerPlugin)
-
-        // Configure LDtk settings to load all levels with their neighbors
-        .insert_resource(LdtkSettings {
-            level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
-                load_level_neighbors: true,
-            },
-            ..Default::default()
-        })
-        // Optionally, set the initial level
-        .insert_resource(LevelSelection::Identifier("Level_0".to_string())) // Starting level identifier
-        .add_systems(Startup, setup)
-
-        // Add plugins and systems
-        .add_plugins(animation::PlayerAnimationPlugin)
-        .add_plugins(grapple::GrapplePlugin)
-        .add_plugins(walls::WallPlugin)
-        .add_plugins(ground_detection::GroundDetectionPlugin)
-        .add_plugins(wall_climb::WallClimbPlugin)
-
-        .run();
-}
-
-
-
-/*
-
-// Website Handling
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen(start)]
-pub fn main_web() {
-    console_error_panic_hook::set_once();  // This will log any panics to the browser console
-
-    web_sys::console::log_1(&"Bevy WebAssembly - Grapple Arena - starting...".into());
-
-    // Initialize
-    App::new()
-        .add_plugins(
-            DefaultPlugins.set(
-                WindowPlugin {
-                    primary_window: Some(Window {
-                        canvas: Some("#bevy_canvas".into()),
-                        ..default()
-                    }),
-                    ..default()
-                }))
-
-        .add_plugins(LdtkPlugin)
-        .add_plugins(RapierPhysicsPlugin::<()>::default())
 
         .add_systems(Startup, setup)
         .insert_resource(LevelSelection::index(0))
+        .insert_resource(LdtkSettings {
+            level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
+                load_level_neighbors: true
 
-        //implement player plugin
+            },
+            set_clear_color: SetClearColor::No, // Ensure we don't clear entities unexpectedly
+            ..Default::default()
+        })
+
+        //implement plugins
         .add_plugins(animation::PlayerAnimationPlugin)
         .add_plugins(player::PlayerPlugin)
+        .add_plugins(levels::LevelPlugin)
+        .add_plugins(grapple::GrapplePlugin)
         .add_plugins(walls::WallPlugin)
+        .add_plugins(lava::LavaPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
         .add_plugins(wall_climb::WallClimbPlugin)
-        .add_plugins(grappling::GrapplingPlugin)
 
         .run();
-
-    web_sys::console::log_1(&"Game initialization complete.".into());
 }
-
- */
