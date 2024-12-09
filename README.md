@@ -11,6 +11,12 @@ Where it comes from: downloaded from https://freepixels.com
 Who created it: John Smith
 
 
+Demo Character Asset
+File name: Anim_Robot_Walk1_v1.1_spritesheet.png, Anim_Robot_Jump1_v1.1_spritesheet.png
+What is it: a spritesheet (that was used before the main spritesheet was made) for a robot that includes their jumping and walking animations.
+Where it comes from:
+Who created it:
+
 Character Asset
 File name: man_grapple.png, man_jump_spritesheet.png, man_walk_spritesheet (1).png
 What is it: a spritesheet for the main character that includes jumping, walking, and grappling animation
@@ -25,7 +31,7 @@ Who created it:
 
 Tileset Asset
 File name: LDTK-test.ldtk, 1_Industrial_Tileset_1.png, 2_Industrial_Tileset_1_Background.png
-What is it: tileset used for LDTK map maker
+What is it: tileset used for LDTK map maker along with the map itself which is the LDTK file.
 Where it comes from: 
 Who created it: 
 
