@@ -14,6 +14,7 @@ mod animation;
 mod grapple;
 mod lava;
 mod levels;
+mod collectibles;
 
 use startup::setup;
 use crate::player::{camera_follow_system, Player};

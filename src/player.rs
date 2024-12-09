@@ -13,6 +13,7 @@ pub struct PlayerBundle {
     player: Player,
     //can_grapple: bool,
     player_input: PlayerInput,
+    abilities: Abilities,
     #[from_entity_instance]
     physics: PhysicsBundle,
     animation_bundle: AnimationBundle,
@@ -23,12 +24,18 @@ pub struct PlayerBundle {
     worldly: Worldly,
     #[from_entity_instance]
     entity_instance: EntityInstance,
-
 }
 
 #[derive(Copy, Clone, Default, Debug, Component)]
 pub struct Player {
     pub double_jump: bool,
+}
+
+#[derive(Copy, Clone, Default, Component)]
+pub struct Abilities {
+    pub can_grapple: bool,
+    pub can_wall_climb: bool,
+    pub can_double_jump: bool,
 }
 
 #[derive(Component, Default, Clone)]
@@ -105,6 +112,7 @@ pub fn player_input(
 
 pub fn player_movement(
     mut query: Query<(
+        &Abilities,
         &PlayerInput,
         &mut MovementIntent,
         &mut Player,
@@ -119,6 +127,7 @@ pub fn player_movement(
     )>,
 ) {
     for (
+        abilities,
         input,
         mut intent,
         mut player,
@@ -161,7 +170,7 @@ pub fn player_movement(
         }
 
         // Handle jumping
-        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || !player.double_jump);
+        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || (!player.double_jump && !abilities.can_double_jump));
         if intent.wants_to_jump {
             if !ground_detection.on_ground && !climb_detection.climbing {
                 player.double_jump = true;
@@ -199,7 +208,6 @@ pub fn player_movement(
             velocity.linvel = Vec2::ZERO;  // Reset velocity
             force.force = Vec2::ZERO;
         }
-
 
         // Vertical movement intent
         intent.vertical = velocity.linvel.y;
@@ -280,8 +288,6 @@ pub fn reset_position(mut transform: Transform) -> Transform {
     transform.translation = Vec3::new(512.0, -344.0, 10.0);
     transform
 }
-
-
 
 
 pub struct PlayerPlugin;
