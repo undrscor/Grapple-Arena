@@ -6,6 +6,8 @@ use crate::wall_climb::ClimbDetection;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use bevy_kira_audio::{Audio, AudioControl};
+
 //use crate::startup::{setup, LevelBounds};
 
 #[derive(Clone, Default, Bundle, LdtkEntity)]
@@ -111,6 +113,8 @@ pub fn player_input(
 }
 
 pub fn player_movement(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
     mut query: Query<(
         //&Abilities,
         &PlayerInput,
@@ -126,6 +130,7 @@ pub fn player_movement(
         &mut Sprite,
     )>,
 ) {
+    //let walk_sound = asset_server.load("player_walk.ogg");
     for (
         //abilities,
         input,
@@ -140,10 +145,13 @@ pub fn player_movement(
         mut damping,
         mut sprite,
     ) in query.iter_mut() {
+        let mut is_moving_now = false;
+
 
         //implementation of forces for horizontal movement, meaning the player gradually speeds up instead of achieving max move speed instantly
         if input.move_right
         {
+            //audio.play(walk_sound.clone());
             let new_horizontal_force = calc_force_diff(
                 intent.horizontal,
                 velocity.linvel.x,
@@ -153,6 +161,7 @@ pub fn player_movement(
             sprite.flip_x = false;
         } else if input.move_left
         {
+            //audio.play(walk_sound.clone());
             let new_horizontal_force = calc_force_diff(
                 intent.horizontal,
                 velocity.linvel.x,
@@ -162,6 +171,7 @@ pub fn player_movement(
             force.force.x = new_horizontal_force * PLAYER_ACCELERATION_MULTIPLIER;
             sprite.flip_x = true;
         } else {
+            //audio.stop();
             if velocity.linvel.x.abs() > 0.01 {
                 let new_horizontal_force =
                     -velocity.linvel.x;

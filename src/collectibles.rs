@@ -3,6 +3,8 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::physics::{PhysicsBundle, SensorBundle};
 use crate::player::Player;
+use bevy_kira_audio::{Audio, AudioControl};
+
 
 #[derive(Clone, Bundle, Default, LdtkEntity)]
 pub struct CollectibleBundle{
@@ -26,8 +28,10 @@ fn collect_collectible(
     mut commands: Commands,
     rapier_context: Res<RapierContext>,
     mut player_query: Query<(Entity, &mut Player, &mut Transform, &mut Velocity), With<Player>>,
-    collectible_query: Query<(Entity), With<Collectible>>,
+    collectible_query: Query<(Entity), With<Collectible>>, asset_server: Res<AssetServer>,  audio: Res<Audio>,
 ) {
+    let collected = asset_server.load("collect.ogg");
+
     let (player_entity, mut player, mut player_transform, mut player_velocity) = if let Ok(player) = player_query.get_single_mut() {
         player
     } else {
@@ -40,10 +44,12 @@ fn collect_collectible(
             //print!("collected collectible");
             commands.entity(collectible_entity).despawn();
             player.progression += 1;
+            audio.play(collected.clone());
 
             if player.progression >= 4 {
                 player_transform.translation = Vec3::new(512.0, -344.0, 10.0);
                 player_velocity.linvel = Vec2::ZERO;
+
             }
         }
     }

@@ -1,4 +1,4 @@
-use crate::game_menu::update_game;
+use crate::game_menu::{close_popup, rules_button_interaction, update_game};
 use crate::game_menu::handle_loading;
 use crate::game_menu::cleanup_menu;
 use crate::game_menu::button_interaction;
@@ -21,14 +21,13 @@ mod lava;
 mod levels;
 mod collectibles;
 mod game_menu;
-
+mod progression_ui;
 
 use startup::setup;
 use crate::player::{camera_follow_system, Player};
 use crate::game_menu::GameState;
 use crate::game_menu::setup_menu;
-
-
+use crate::progression_ui::ProgressionUiPlugin;
 
 fn main() {
     App::new()
@@ -54,6 +53,14 @@ fn main() {
             button_interaction.run_if(in_state(GameState::MainMenu))
         )
         .add_systems(
+            Update,
+            rules_button_interaction.run_if(in_state(GameState::MainMenu))
+        )
+        .add_systems(
+            Update,
+            close_popup.run_if(in_state(GameState::MainMenu))
+        )
+        .add_systems(
             OnExit(GameState::MainMenu),
             cleanup_menu
         )
@@ -69,6 +76,7 @@ fn main() {
         })
 
         //implement plugins
+        .add_plugins(ProgressionUiPlugin) // Add the UI plugin
         .add_plugins(animation::PlayerAnimationPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(levels::LevelPlugin)
