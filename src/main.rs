@@ -24,7 +24,7 @@ mod game_menu;
 
 
 use startup::setup;
-use crate::player::{camera_follow_system, Player};
+use crate::player::Player;
 use crate::game_menu::GameState;
 use crate::game_menu::setup_menu;
 

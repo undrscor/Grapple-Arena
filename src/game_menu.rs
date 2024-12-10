@@ -28,7 +28,7 @@ pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            background_color: Color::rgb(0.1, 0.1, 0.1).into(),
+            background_color: Color::srgb(0.1, 0.1, 0.1).into(),
             ..Default::default()
         },
         MenuElement,
@@ -43,7 +43,7 @@ pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         align_items: AlignItems::Center,
                         ..Default::default()
                     },
-                    background_color: Color::rgb(0.9, 0.9, 0.9).into(),
+                    background_color: Color::srgb(0.9, 0.9, 0.9).into(),
                     ..Default::default()
                 },
                 StartButton,
