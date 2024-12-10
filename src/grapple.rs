@@ -113,7 +113,7 @@ pub fn update_grapple(
                     commands.entity(player_entity).insert(
                         ImpulseJoint::new(grapple_entity, *joint.build().set_contacts_enabled(false).set_max_distance(distance)),
                     );
-                    player.double_jump = false;
+                    player.double_jumped = false;
                     if !ground_detection.on_ground {
                         player_velocity.linvel.y = -300.0;
                     }

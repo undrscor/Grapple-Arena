@@ -30,7 +30,7 @@ pub struct PlayerBundle {
 #[derive(Copy, Clone, Default, Debug, Component)]
 pub struct Player {
     pub progression: u8,
-    pub double_jump: bool,
+    pub double_jumped: bool,
 }
 
 // #[derive(Copy, Clone, Default, Component)]
@@ -105,10 +105,9 @@ pub fn player_input(
         input.jump = keyboard_input.just_pressed(KeyCode::Space);
         input.jump_held = keyboard_input.pressed(KeyCode::Space);
         input.fast_fall = keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS);
-        input.grapple = keyboard_input.just_pressed(KeyCode::KeyJ);
-        input.grapple_held = keyboard_input.pressed(KeyCode::KeyJ);
+        input.grapple = keyboard_input.just_pressed(KeyCode::KeyJ) || keyboard_input.just_pressed(KeyCode::ShiftLeft);
+        input.grapple_held = keyboard_input.pressed(KeyCode::KeyJ) || keyboard_input.pressed(KeyCode::ShiftLeft);
         input.restart = keyboard_input.just_pressed(KeyCode::KeyR);
-        //input.grapple_released = keyboard_input.just_released(KeyCode::KeyJ);
     }
 }
 
@@ -180,17 +179,15 @@ pub fn player_movement(
         }
 
         // Handle jumping
-        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || (!player.double_jump && player.progression >= 1));
+        intent.wants_to_jump = input.jump && (ground_detection.on_ground || (climb_detection.climbing && player.progression >= 2) || (!player.double_jumped && player.progression >= 1));
         if intent.wants_to_jump {
-            if !ground_detection.on_ground && !climb_detection.climbing {
-                player.double_jump = true;
-            }
+            player.double_jumped = true;
             velocity.linvel.y = PLAYER_JUMP_STRENGTH;
         }
 
         // Reset double jump if on ground or climbing
-        if (ground_detection.on_ground || climb_detection.climbing) && player.progression >= 1 {
-            player.double_jump = false;
+        if (ground_detection.on_ground && player.progression >= 1) || (climb_detection.climbing && player.progression >= 2){
+            player.double_jumped = false;
         }
 
         // Adjust jump height
@@ -206,16 +203,16 @@ pub fn player_movement(
         }
 
         // Climbing
-        if climb_detection.climbing && player.progression >= 2 {
+        if climb_detection.climbing && player.progression >= 2 && !ground_detection.on_ground {
             damping.linear_damping = if input.jump_held { 0.0 } else { 15.0 };
         } else {
             damping.linear_damping = 0.0;
         }
 
-        if input.restart {
-            println!("playerposition: {}", transform.translation);
+        if input.restart && player.progression < 4 {
+            //println!("playerposition: {}", transform.translation);
             *transform = reset_position(transform.clone());
-            velocity.linvel = Vec2::ZERO;  // Reset velocity
+            velocity.linvel = Vec2::ZERO;
             force.force = Vec2::ZERO;
         }
 
@@ -294,6 +291,22 @@ fn update_player_animation(
     }
 }
 
+fn check_fall_death(
+    mut player_query: Query<(&mut Transform, &mut Velocity), With<Player>>,
+) {
+    for (mut transform, mut velocity) in player_query.iter_mut() {
+        //print!("playerposition: {}", transform.translation);
+        // Adjust this value based on your lowest platform/level position
+        const DEATH_Y_THRESHOLD: f32 = -1257.0; // or whatever value works for your map
+
+        if transform.translation.y < DEATH_Y_THRESHOLD {
+            // Use your existing reset_position function
+            *transform = reset_position(transform.clone());
+            velocity.linvel = Vec2::ZERO;
+        }
+    }
+}
+
 pub fn reset_position(mut transform: Transform) -> Transform {
     transform.translation = Vec3::new(512.0, -344.0, 10.0);
     transform
@@ -306,7 +319,7 @@ impl Plugin for PlayerPlugin {
         app
             .register_ldtk_entity::<PlayerBundle>("Player")
 
-            .add_systems(Update, (player_input, player_movement.after(player_input), update_player_animation.after(player_movement), camera_follow_system,));
+            .add_systems(Update, (check_fall_death,player_input, player_movement.after(player_input), update_player_animation.after(player_movement), camera_follow_system,));
     }
 }
 
