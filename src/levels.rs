@@ -1,3 +1,8 @@
+use crate::startup::LevelMusicMap;
+use bevy::prelude::AssetServer;
+use bevy_kira_audio::prelude::*;
+use bevy_kira_audio::prelude::AudioSource;
+use std::collections::HashMap;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{Assets, GlobalTransform, Handle, Query, Rect, Res, ResMut, Vec2, With};
 use bevy_ecs_ldtk::{LevelIid, LevelSelection};
@@ -10,6 +15,8 @@ fn level_selection_follow_player(
     ldtk_projects: Query<&Handle<LdtkProject>>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
     mut level_selection: ResMut<LevelSelection>,
+    level_music_map: Res<LevelMusicMap>, // Access the level-to-music map
+    audio: Res<Audio>,
 ) {
     if let Ok(player_transform) = players.get_single() {
         let ldtk_project = ldtk_project_assets
@@ -32,12 +39,34 @@ fn level_selection_follow_player(
                 ),
             };
 
+            // Check if the player is in the current level
             if level_bounds.contains(player_transform.translation().truncate()) {
-                *level_selection = LevelSelection::Iid(level_iid.clone());
+                let current_level = LevelSelection::Iid(level_iid.clone());
+
+                // Only proceed if the level has changed
+                if *level_selection != current_level {
+                    *level_selection = current_level.clone();
+
+                    // Fetch the music handle for the new level
+                    if let Some(music_handle) = level_music_map.music_map.get(level_iid.get()) {
+                        // Stop the current music and play the new one
+                        audio.stop();
+                        audio.play(music_handle.clone()).looped().with_volume(0.8);
+
+                        print!("Playing music for level: {}", level_iid.get());
+                    } else {
+                        // Log a warning if no music is found for the level
+                        print!(
+                            "No music found for level: {}. Default music will be played.",
+                            level_iid.get()
+                        );
+                    }
+                }
             }
         }
     }
 }
+
 
 pub struct LevelPlugin;
 impl Plugin for LevelPlugin {
