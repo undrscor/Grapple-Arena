@@ -73,7 +73,7 @@ fn collect_collectible(
 
             match player.progression {
                 4 => {
-                    find_text = "You Win!";
+                    find_text = "You have been locked away \nfor the great evils you've commited!";
                 }
                 3 => {
                     find_text = "You unlocked the Grappling Hook!\nPress J to grapple!";
@@ -116,7 +116,7 @@ fn collect_collectible(
                             find_text,
                             TextStyle {
                                 font: asset_server.load("FiraSans-Bold.ttf"),
-                                font_size: 30.0,
+                                font_size: 10.0,
                                 color: Color::WHITE,
                             },
                         ).with_justify(JustifyText::Center),

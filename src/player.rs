@@ -298,7 +298,7 @@ fn check_fall_death(
 }
 
 pub fn reset_position(mut transform: Transform) -> Transform {
-    transform.translation = Vec3::new(512.0, -344.0, 10.0);
+    transform.translation = Vec3::new(470.0, -344.0, 10.0);
     transform
 }
 
