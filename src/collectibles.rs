@@ -40,7 +40,7 @@ fn handle_text_fade(
     time: Res<Time>,
     mut query: Query<(Entity, &mut Text, &mut FadeOutText)>,
 ) {
-    for (entity,mut text, mut fade) in query.iter_mut() {
+    for (entity, mut text, mut fade) in query.iter_mut() {
         fade.timer.tick(time.delta());
         // Update text alpha
         text.sections[0].style.color.set_alpha(fade.timer.fraction_remaining());
@@ -49,6 +49,7 @@ fn handle_text_fade(
             commands.entity(entity).despawn();
         }
     }
+}
 
 
 fn collect_collectible(
@@ -144,16 +145,16 @@ fn animate_collectibles(
     }
 }
 
-pub struct CollectiblePlugin;
-impl Plugin for CollectiblePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, (animate_collectibles, collect_collectible, handle_text_fade))
-            .register_ldtk_entity::<CollectibleBundle>("DefaultCollectible");
+    pub struct CollectiblePlugin;
+    impl Plugin for CollectiblePlugin {
+        fn build(&self, app: &mut App) {
+            app.add_systems(Update, (animate_collectibles, collect_collectible, handle_text_fade))
+                .register_ldtk_entity::<CollectibleBundle>("DefaultCollectible");
             //.register_ldtk_entity::<CollectibleBundle>("Boots");
             //.register_ldtk_entity::<CollectibleBundle>("Pills");
             //.register_ldtk_entity::<CollectibleBundle>("Hook");
             //.register_ldtk_entity::<CollectibleBundle>("Coin");
             //.register_ldtk_entity::<CollectibleBundle>("DefaultCollectible");
 
+        }
     }
-}}
