@@ -12,7 +12,7 @@ pub struct Lava;
 pub struct LavaBundle {
     #[from_int_grid_cell]
     pub sensor_bundle: SensorBundle,
-    lava: Lava,
+    pub lava: Lava,
 }
 
 // Component to track lava contact time(triggers after 0.6 seconds by default implementation)

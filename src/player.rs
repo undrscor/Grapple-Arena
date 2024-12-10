@@ -11,9 +11,8 @@ use bevy_rapier2d::prelude::*;
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     player: Player,
-    //can_grapple: bool,
     player_input: PlayerInput,
-    abilities: Abilities,
+    //abilities: Abilities,
     #[from_entity_instance]
     physics: PhysicsBundle,
     animation_bundle: AnimationBundle,
@@ -28,15 +27,16 @@ pub struct PlayerBundle {
 
 #[derive(Copy, Clone, Default, Debug, Component)]
 pub struct Player {
+    pub progression: u8,
     pub double_jump: bool,
 }
 
-#[derive(Copy, Clone, Default, Component)]
-pub struct Abilities {
-    pub can_grapple: bool,
-    pub can_wall_climb: bool,
-    pub can_double_jump: bool,
-}
+// #[derive(Copy, Clone, Default, Component)]
+// pub struct Abilities {
+//     pub can_grapple: bool,
+//     pub can_wall_climb: bool,
+//     pub can_double_jump: bool,
+// }
 
 #[derive(Component, Default, Clone)]
 pub struct PlayerInput {
@@ -47,7 +47,7 @@ pub struct PlayerInput {
     pub fast_fall: bool,
     pub grapple: bool,
     pub grapple_held: bool,
-    pub grapple_released: bool,
+    //pub grapple_released: bool,
     pub restart: bool,
 }
 
@@ -112,7 +112,7 @@ pub fn player_input(
 
 pub fn player_movement(
     mut query: Query<(
-        &Abilities,
+        //&Abilities,
         &PlayerInput,
         &mut MovementIntent,
         &mut Player,
@@ -127,7 +127,7 @@ pub fn player_movement(
     )>,
 ) {
     for (
-        abilities,
+        //abilities,
         input,
         mut intent,
         mut player,
@@ -170,7 +170,7 @@ pub fn player_movement(
         }
 
         // Handle jumping
-        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || (!player.double_jump && !abilities.can_double_jump));
+        intent.wants_to_jump = input.jump && (ground_detection.on_ground || climb_detection.climbing || (!player.double_jump && player.progression >= 1));
         if intent.wants_to_jump {
             if !ground_detection.on_ground && !climb_detection.climbing {
                 player.double_jump = true;
@@ -179,7 +179,7 @@ pub fn player_movement(
         }
 
         // Reset double jump if on ground or climbing
-        if ground_detection.on_ground || climb_detection.climbing {
+        if (ground_detection.on_ground || climb_detection.climbing) && player.progression >= 1 {
             player.double_jump = false;
         }
 
@@ -196,7 +196,7 @@ pub fn player_movement(
         }
 
         // Climbing
-        if climb_detection.climbing {
+        if climb_detection.climbing && player.progression >= 2 {
             damping.linear_damping = if input.jump_held { 0.0 } else { 15.0 };
         } else {
             damping.linear_damping = 0.0;
@@ -226,16 +226,16 @@ fn update_player_animation(
     texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut animation_assets: ResMut<AnimationAssets>,
     mut query: Query<(
+        &Player,
         &mut TextureAtlas,
         &mut Handle<Image>,
         &Velocity,
-        &MovementIntent,
         &PlayerInput, // Added to check grappling input
     )>,
 ) {
-    for (mut texture_atlas, mut texture, velocity, intent, input) in query.iter_mut() {
+    for (player, mut texture_atlas, mut texture, velocity, input) in query.iter_mut() {
         // Determine animation type based on state
-        let animation_type = if input.grapple_held {
+        let animation_type = if input.grapple_held && player.progression >= 3 {
             // If grapple is active
             AnimationType::Grapple
         } else if velocity.linvel.y.abs() > 0.1 {

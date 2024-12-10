@@ -59,17 +59,32 @@ pub struct SensorBundle {
     pub rotation_constraints: LockedAxes,
 }
 
+impl From<&EntityInstance> for SensorBundle {
+    fn from(entity_instance: &EntityInstance) -> Self {
+        match entity_instance.identifier.as_ref() {
+            "DefaultCollectible" => SensorBundle {
+                collider: Collider::ball(8.),
+                sensor: Sensor,
+                active_events: ActiveEvents::COLLISION_EVENTS,
+                rotation_constraints: LockedAxes::ROTATION_LOCKED,
+                //..Default::default()
+            },
+            _ => Self::default(),
+        }
+    }
+}
+
 impl From<IntGridCell> for SensorBundle {
     fn from(int_grid_cell: IntGridCell) -> SensorBundle {
-        let rotation_constraints = LockedAxes::ROTATION_LOCKED;
+        //let rotation_constraints = LockedAxes::ROTATION_LOCKED;
 
         // ladder
         if int_grid_cell.value == 2 {
             SensorBundle {
                 collider: Collider::cuboid(16., 16.),
                 sensor: Sensor,
-                rotation_constraints,
                 active_events: ActiveEvents::COLLISION_EVENTS,
+                rotation_constraints: LockedAxes::ROTATION_LOCKED,
             }
         } else {
             SensorBundle::default()

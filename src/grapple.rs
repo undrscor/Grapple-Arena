@@ -37,9 +37,10 @@ pub enum HookState {
 pub fn grapple_launch(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    parent_query: Query<(&Transform, &Velocity, &Sprite, &PlayerInput), With<Player>>,
+    parent_query: Query<(&Player, &Transform, &Velocity, &Sprite, &PlayerInput), With<Player>>,
 ) {
-    for (player_transform, player_velocity, player_sprite, input) in parent_query.iter() {
+    for (player, player_transform, player_velocity, player_sprite, input) in parent_query.iter() {
+        if player.progression < 3 {continue;}
         let direction = if !player_sprite.flip_x { 1.0 } else { -1.0 };
         let additional_velocity = Vec2::new(300.0 * direction, 300.0);
         if input.grapple {
@@ -133,7 +134,7 @@ pub fn update_grapple(
             }
             if player_input.jump || !player_input.grapple_held || (state.eq(&HookState::Swinging) && (climb_detection.climbing)) {
                 commands.entity(player_entity).remove::<ImpulseJoint>();
-                commands.entity(grapple_entity).despawn();
+                commands.entity(grapple_entity).despawn_recursive();
             }
         }
     }

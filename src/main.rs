@@ -77,6 +77,7 @@ fn main() {
         .add_plugins(lava::LavaPlugin)
         .add_plugins(ground_detection::GroundDetectionPlugin)
         .add_plugins(wall_climb::WallClimbPlugin)
+        .add_plugins(collectibles::CollectiblePlugin)
 
         .run();
 }

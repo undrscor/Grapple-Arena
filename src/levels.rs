@@ -1,13 +1,10 @@
 use crate::startup::LevelMusicMap;
-use bevy::prelude::AssetServer;
-use bevy_kira_audio::prelude::*;
-use bevy_kira_audio::prelude::AudioSource;
-use std::collections::HashMap;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{Assets, GlobalTransform, Handle, Query, Rect, Res, ResMut, Vec2, With};
 use bevy_ecs_ldtk::{LevelIid, LevelSelection};
 use bevy_ecs_ldtk::prelude::{LdtkProject, LevelMetadataAccessor};
-use crate::player::{camera_follow_system, player_input, player_movement, Player, PlayerBundle};
+use bevy_kira_audio::{Audio, AudioControl};
+use crate::player::Player;
 
 fn level_selection_follow_player(
     players: Query<&GlobalTransform, With<Player>>,
