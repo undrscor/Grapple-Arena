@@ -1,3 +1,7 @@
+use crate::game_menu::update_game;
+use crate::game_menu::handle_loading;
+use crate::game_menu::cleanup_menu;
+use crate::game_menu::button_interaction;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -16,9 +20,15 @@ mod grapple;
 mod lava;
 mod levels;
 mod collectibles;
+mod game_menu;
+
 
 use startup::setup;
 use crate::player::{camera_follow_system, Player};
+use crate::game_menu::GameState;
+use crate::game_menu::setup_menu;
+
+
 
 fn main() {
     App::new()
@@ -30,10 +40,24 @@ fn main() {
             AudioPlugin,
             LdtkPlugin,
             RapierPhysicsPlugin::<()>::default(),
-            RapierDebugRenderPlugin::default(), //for debugging colliders
+            //RapierDebugRenderPlugin::default(), //for debugging colliders
         ))
+        .init_state::<GameState>() // Add the GameState
 
         .add_systems(Startup, setup)
+        .add_systems(
+            OnEnter(GameState::MainMenu),
+            setup_menu
+        )
+        .add_systems(
+            Update,
+            button_interaction.run_if(in_state(GameState::MainMenu))
+        )
+        .add_systems(
+            OnExit(GameState::MainMenu),
+            cleanup_menu
+        )
+
         .insert_resource(LevelSelection::index(0))
         .insert_resource(LdtkSettings {
             level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
