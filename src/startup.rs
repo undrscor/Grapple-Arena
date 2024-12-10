@@ -9,7 +9,7 @@ pub struct LevelMusicMap {
     pub music_map: HashMap<String, Handle<AudioSource>>,
 }
 
-pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
+pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _audio: Res<Audio>) {
     // Spawn a zoomed-in camera
     commands.spawn(Camera2dBundle {
         projection: OrthographicProjection {

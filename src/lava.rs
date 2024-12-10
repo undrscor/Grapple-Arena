@@ -81,7 +81,7 @@ fn detect_lava(
             .insert(burning_effect);
     } else if !is_in_lava && is_burning {
         // Player just left lava
-        if let Ok(burning) = burning_query.get(player_entity) {
+        if let Ok(_burning) = burning_query.get(player_entity) {
             sprite.color = Color::WHITE;
             commands.entity(player_entity)
                 .remove::<LavaContact>()

@@ -78,10 +78,10 @@ pub fn button_interaction(
                 next_state.set(GameState::Loading);
             }
             Interaction::Hovered => {
-                *color = Color::rgb(0.8, 0.8, 0.8).into();
+                *color = Color::srgb(0.7, 0.7, 0.7).into();
             }
             Interaction::None => {
-                *color = Color::rgb(0.9, 0.9, 0.9).into();
+                *color = Color::srgb(0.9, 0.9, 0.9).into();
             }
         }
     }
