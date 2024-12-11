@@ -3,25 +3,8 @@ A 2D movement-based platformer game with advancing mechanics that allow the play
 The game is built using rust on bevy game engine, using the bevy_ecs_ldtk plugin and bevy_rapier2d for physics, with a dedicated soundtrack and pixelated artstyle.
 
 ---------------------------------------------------------------------------------------
-
-
-(Template until submission)
-
-
-Asset
-
-File name: myimage1.png, myimage2.png, enemysprite.png
-
-What is it: a spritesheet for the main character, and enemy character
-
-Where it comes from: downloaded from https://freepixels.com
-
-Who created it: John Smith
-
-
 Asset Credentials
 ---------------------------------------------------------------------------------------
-
 
 Demo Character Asset
 
@@ -49,7 +32,7 @@ Who created it: Sydney Bynoe
 
 Hook and Collectible Assets
 
-File name: hook.png, DefaultCollectible.png
+File name: hook.png, collectible.png
 
 What is it: Sprite images for the grappling hook and collectible items
 
@@ -73,7 +56,7 @@ Who created it: Atomic Realm (https://atomicrealm.itch.io/)
 
 Main Map Tileset
 
-File name: TilesetMain.png
+File name: tileset_main.png
 
 What is it: Tileset used for our map in the LDTK file.
 
