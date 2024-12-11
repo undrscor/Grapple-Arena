@@ -1433,7 +1433,7 @@
 			"__cHei": 2,
 			"identifier": "Player",
 			"uid": 90,
-			"relPath": "man_walk_spritesheet (1).png",
+			"relPath": "man_walk_spritesheet.png",
 			"embedAtlas": null,
 			"pxWid": 96,
 			"pxHei": 64,

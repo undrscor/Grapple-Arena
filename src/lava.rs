@@ -136,17 +136,6 @@ fn burning_effect(
     }
 }
 
-// fn cleanup_burning_effect(
-//     mut commands: Commands,
-//     mut query: Query<(Entity, &mut Sprite, &BurningEffect), Without<LavaContact>>,
-// ) {
-//     for (entity, mut sprite, burning) in query.iter_mut() {
-//         sprite.color = burning.original_color;
-//         commands.entity(entity).remove::<BurningEffect>();
-//     }
-// }
-
-
 pub struct LavaPlugin;
 
 impl Plugin for LavaPlugin {
@@ -155,7 +144,6 @@ impl Plugin for LavaPlugin {
             detect_lava,
             check_lava_timer.after(detect_lava),
             burning_effect,
-            //cleanup_burning_effect.after(burning_effect),
         )).register_ldtk_int_cell::<LavaBundle>(2);
     }
 }

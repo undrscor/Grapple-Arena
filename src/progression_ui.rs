@@ -29,7 +29,7 @@ pub fn toggle_progression_ui(
 }
 
 pub fn setup_progression_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("FiraSans-Bold.ttf");
+    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
 
     commands.spawn((
         TextBundle::from_section(

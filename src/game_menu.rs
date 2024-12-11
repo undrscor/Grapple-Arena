@@ -34,7 +34,7 @@ pub enum GameState {
 pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>,
 ) {
 
-    let font = asset_server.load("FiraSans-Bold.ttf");
+    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
 
 
     commands.spawn((
@@ -91,7 +91,7 @@ pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>,
                         margin: UiRect::all(Val::Px(10.0)), // Add some spacing
                         ..Default::default()
                     },
-                    background_color: Color::rgb(0.9, 0.9, 0.9).into(),
+                    background_color: Color::srgb(0.9, 0.9, 0.9).into(),
                     ..Default::default()
                 },
                 RulesButton,
@@ -151,7 +151,7 @@ pub fn rules_button_interaction(
 }
 
 pub fn show_rules_popup(commands: &mut Commands, asset_server: &AssetServer) {
-    let font = asset_server.load("FiraSans-Bold.ttf");
+    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
 
     commands.spawn((
         // Spawn a container for both the background and the popup
@@ -164,7 +164,7 @@ pub fn show_rules_popup(commands: &mut Commands, asset_server: &AssetServer) {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            background_color: Color::rgba(0.0, 0.0, 0.0, 0.7).into(), // Dimmed background
+            background_color: Color::srgba(0.0, 0.0, 0.0, 0.7).into(), // Dimmed background
             ..Default::default()
         },
         RulesPopup, // Attach the RulesPopup marker to the entire container
@@ -181,7 +181,7 @@ pub fn show_rules_popup(commands: &mut Commands, asset_server: &AssetServer) {
                     flex_direction: FlexDirection::Column,
                     ..Default::default()
                 },
-                background_color: Color::rgb(0.2, 0.2, 0.3).into(), // Dark blue-gray
+                background_color: Color::srgb(0.2, 0.2, 0.3).into(), // Dark blue-gray
                 ..Default::default()
             })
                 .with_children(|popup| {
@@ -209,7 +209,7 @@ pub fn show_rules_popup(commands: &mut Commands, asset_server: &AssetServer) {
                                 align_items: AlignItems::Center,
                                 ..Default::default()
                             },
-                            background_color: Color::rgb(0.8, 0.0, 0.0).into(), // Bright red
+                            background_color: Color::srgb(0.8, 0.0, 0.0).into(), // Bright red
                             ..Default::default()
                         },
                         ClosePopupButton,
@@ -234,7 +234,7 @@ pub fn button_interaction(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<StartButton>)> , audio: Res<Audio>, asset_server: Res<AssetServer>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    let start = asset_server.load("startEffect.ogg");
+    let start = asset_server.load("sounds/startEffect.ogg");
 
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -267,7 +267,7 @@ pub fn handle_loading(
 
     commands.insert_resource(LevelSelection::index(0));
     commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("LDTK-test.ldtk"),
+        ldtk_handle: asset_server.load("LDTKmap.ldtk"),
         ..Default::default()
     });
 

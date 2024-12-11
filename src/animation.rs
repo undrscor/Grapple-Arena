@@ -62,7 +62,7 @@ fn setup_animation_assets(
         timers.insert(anim_type, timer);
     };
     load_animation(AnimationType::Jump, "man_jump_spritesheet.png".to_string(), 3, 3, 0.1);
-    load_animation(AnimationType::Run, "man_walk_spritesheet (1).png".to_string(), 3, 2, 0.1);
+    load_animation(AnimationType::Run, "man_walk_spritesheet.png".to_string(), 3, 2, 0.1);
     load_animation(AnimationType::Idle, "man_jump_spritesheet.png".to_string(), 1, 1, 0.0); // Use a single-frame texture for Idle.
     load_animation(AnimationType::Grapple, "man_grapple.png".to_string(), 3, 1, 0.0); // Use a single-frame texture for Idle.
 

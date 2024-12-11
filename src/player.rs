@@ -14,7 +14,6 @@ use bevy_kira_audio::{Audio, AudioControl};
 pub struct PlayerBundle {
     player: Player,
     player_input: PlayerInput,
-    //abilities: Abilities,
     #[from_entity_instance]
     physics: PhysicsBundle,
     animation_bundle: AnimationBundle,
@@ -33,13 +32,6 @@ pub struct Player {
     pub double_jumped: bool,
 }
 
-// #[derive(Copy, Clone, Default, Component)]
-// pub struct Abilities {
-//     pub can_grapple: bool,
-//     pub can_wall_climb: bool,
-//     pub can_double_jump: bool,
-// }
-
 #[derive(Component, Default, Clone)]
 pub struct PlayerInput {
     pub move_left: bool,
@@ -49,7 +41,6 @@ pub struct PlayerInput {
     pub fast_fall: bool,
     pub grapple: bool,
     pub grapple_held: bool,
-    //pub grapple_released: bool,
     pub restart: bool,
 }
 
@@ -318,7 +309,6 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .register_ldtk_entity::<PlayerBundle>("Player")
-
             .add_systems(Update, (check_fall_death,player_input, player_movement.after(player_input), update_player_animation.after(player_movement), camera_follow_system,));
     }
 }

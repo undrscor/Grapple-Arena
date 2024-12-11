@@ -23,7 +23,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
 
     // Spawn the world
     commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("LDTK-test.ldtk"),
+        ldtk_handle: asset_server.load("LDTKmap.ldtk"),
         ..Default::default()
     });
 
@@ -32,7 +32,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
         text: Text::from_section(
             "Welcome!",
             TextStyle {
-                font: asset_server.load("FiraSans-Bold.ttf"),
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 25.0,
                 color: Color::WHITE,
             },
@@ -49,7 +49,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
         text: Text::from_section(
             "WASD to move, space to jump, R to respawn",
             TextStyle {
-                font: asset_server.load("FiraSans-Bold.ttf"),
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 25.0,
                 color: Color::WHITE,
             },
@@ -66,7 +66,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
         text: Text::from_section(
             "Remember: you can always go back with R",
             TextStyle {
-                font: asset_server.load("FiraSans-Bold.ttf"),
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 25.0,
                 color: Color::WHITE,
             },
@@ -83,7 +83,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
         text: Text::from_section(
             "The Final Collectible!",
             TextStyle {
-                font: asset_server.load("FiraSans-Bold.ttf"),
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 25.0,
                 color: Color::WHITE,
             },
@@ -100,27 +100,27 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
     //Level_1
     level_music_map.insert(
         "78137f20-9b00-11ef-85d2-918c41126c86".to_string(),
-        asset_server.load("grapple-Arena-dnb.ogg"),
+        asset_server.load("sounds/grapple-Arena-dnb.ogg"),
     );
     //Level_2
     level_music_map.insert(
         "89f13410-9b00-11ef-85d2-030c58c7d34b".to_string(),
-        asset_server.load("grapple-Arena-peaceful-sticatto.ogg"),
+        asset_server.load("sounds/grapple-Arena-peaceful-sticatto.ogg"),
     );
     //Level_3
     level_music_map.insert(
         "aa737fe0-9b00-11ef-85d2-cd1f6eb084b1".to_string(),
-        asset_server.load("CHRONO-grapple-arena.ogg"),
+        asset_server.load("sounds/CHRONO-grapple-arena.ogg"),
     );
     //Level_4
     level_music_map.insert(
         "f2f338f0-9b00-11ef-85d2-151712402bd4".to_string(),
-        asset_server.load("DK-grapple-arena.ogg"),
+        asset_server.load("sounds/DK-grapple-arena.ogg"),
     );
     //Level_0
     level_music_map.insert(
         "69cafc60-4ce0-11ef-ac02-af3d88f88f16".to_string(),
-        asset_server.load("grapple.ogg"),
+        asset_server.load("sounds/grapple.ogg"),
     );
 
     // Wrap the HashMap in LevelMusicMap and insert it as a resource
