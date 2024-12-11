@@ -55,7 +55,7 @@ pub fn grapple_launch(
                             flip_x: player_sprite.flip_x,
                             ..Default::default()
                         },
-                        transform: Transform::from_xyz(player_transform.translation.x + (10. * direction), player_transform.translation.y + 10., 0.0),
+                        transform: Transform::from_xyz(player_transform.translation.x + (10. * direction), player_transform.translation.y + 10., 6.0),
                         ..Default::default()
                     },
                     rigid_body: RigidBody::KinematicVelocityBased,

@@ -12,7 +12,7 @@ File name: Anim_Robot_Walk1_v1.1_spritesheet.png, Anim_Robot_Jump1_v1.1_spritesh
 
 What is it: a spritesheet (that was used before the main spritesheet was made) for a robot that includes their jumping and walking animations.
 
-Where it comes from: https://atomicrealm.itch.io/industrial-tileset (https://atomicrealm.itch.io/)
+Where it comes from: https://atomicrealm.itch.io/industrial-tileset 
 
 Who created it: Atomic Realm (https://atomicrealm.itch.io/)
 
