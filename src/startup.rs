@@ -81,6 +81,23 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>, _aud
     commands.spawn(
     Text2dBundle {
         text: Text::from_section(
+            "Dont fall!",
+            TextStyle {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 25.0,
+                color: Color::WHITE,
+            },
+        ).with_justify(JustifyText::Center),
+        visibility: Visibility::Visible,
+        text_anchor: Anchor::Center,
+        transform: Transform::from_xyz(-385.0, -100.0, 5.0),
+
+        ..default()
+    });
+
+    commands.spawn(
+    Text2dBundle {
+        text: Text::from_section(
             "The Final Collectible!",
             TextStyle {
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
