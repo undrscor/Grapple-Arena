@@ -103,6 +103,18 @@ Who created it: Sydney Bynoe
 
 ---------------------------------------------------------------------------------------
 
+Game logo art
+
+File name: PATH_OF_ARTIFACTS.png
+
+What is it: Logo art for out game, used in the title screen as well as for the website logo
+
+Where it comes from: Generated using AI art generation
+
+Who created it: Sydney Bynoe
+
+---------------------------------------------------------------------------------------
+
 Miscellaneous Asset Files
 
 File name: all files in assets/misc
