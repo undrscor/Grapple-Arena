@@ -31,13 +31,12 @@ pub enum GameState {
 
 
 //Menu
-pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>,
-) {
-
+pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-
+    let background_image = asset_server.load("PATH_OF_ARTIFACTS.png"); // Load your background image
 
     commands.spawn((
+        // Root container for the menu
         NodeBundle {
             style: Style {
                 width: Val::Percent(100.0),
@@ -47,13 +46,25 @@ pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>,
                 flex_direction: FlexDirection::Column, // Stack buttons vertically
                 ..Default::default()
             },
-            background_color: Color::srgb(0.1, 0.1, 0.1).into(),
+            background_color: Color::NONE.into(), // Transparent to show the image
             ..Default::default()
         },
         MenuElement,
     ))
         .with_children(|parent| {
-            // Start Game Button
+            // Add a background image
+            parent.spawn(ImageBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    ..Default::default()
+                },
+                image: UiImage::new(background_image.clone()),
+                ..Default::default()
+            });
+
+            // Add buttons and other UI elements
             parent.spawn((
                 ButtonBundle {
                     style: Style {
@@ -70,17 +81,16 @@ pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>,
                 MenuElement,
             ))
                 .with_children(|parent| {
-                    parent.spawn((TextBundle::from_section(
+                    parent.spawn(TextBundle::from_section(
                         "Start Game",
                         TextStyle {
                             font: font.clone(),
                             font_size: 40.0,
                             color: Color::BLACK,
                         },
-                    ), MenuElement));
+                    ));
                 });
 
-            // Rules Button
             parent.spawn((
                 ButtonBundle {
                     style: Style {
@@ -98,17 +108,18 @@ pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>,
                 MenuElement,
             ))
                 .with_children(|parent| {
-                    parent.spawn((TextBundle::from_section(
-                        "Rules",
+                    parent.spawn(TextBundle::from_section(
+                        "About",
                         TextStyle {
                             font,
                             font_size: 40.0,
                             color: Color::BLACK,
                         },
-                    ), MenuElement));
+                    ));
                 });
         });
 }
+
 //rules segment
 
 pub fn close_popup(
@@ -187,7 +198,7 @@ pub fn show_rules_popup(commands: &mut Commands, asset_server: &AssetServer) {
                 .with_children(|popup| {
                     // Rules text
                     popup.spawn(TextBundle::from_section(
-                        "Help little man escape!\n\nTraverse the arena to find 'redacted' in order to escape.",
+                        "You're a trapped test subject on a foreign planet!\n\nProve to the scientists that you are capable of traversing their trials.\n\nLocate key artifacts to unlock your path. Complete the trials to earn your freedom!",
                         TextStyle {
                             font: font.clone(),
                             font_size: 24.0,

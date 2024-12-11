@@ -56,6 +56,7 @@ fn collect_collectible(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     rapier_context: Res<RapierContext>,
+    audio: Res<Audio>,
     mut player_query: Query<(Entity, &mut Player, &mut Transform, &mut Velocity), With<Player>>,
     collectible_query: Query<Entity, With<Collectible>>,
 ) {
@@ -66,17 +67,19 @@ fn collect_collectible(
     };
 
     for collectible_entity in collectible_query.iter() {
+        let collected = asset_server.load("sounds/collect.ogg");
         if rapier_context.intersection_pair(player_entity, collectible_entity) == Some(true)
         {
             //print!("collected collectible");
             commands.entity(collectible_entity).despawn();
             player.progression += 1;
+            audio.play(collected.clone());
 
             let mut find_text = "";
 
             match player.progression {
                 4 => {
-                    find_text = "You have been locked away \nfor the great evils you've commited!";
+                    find_text = "The scientists have deemed you too \n valuable for a test subject. \n\nYou will remain in containment indefinitely \n Trial complete.";
                 }
                 3 => {
                     find_text = "You unlocked the Grappling Hook!\nPress J to grapple!";
