@@ -1,5 +1,5 @@
 [package]
-name = "Grapple-Arena"
+name = "Path-of-Artifacts"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,10 +7,10 @@ edition = "2021"
 bevy = "0.14.2"
 bevy_asset_loader = "0.22.0"
 bevy_ecs_ldtk = "0.10.0"
-#bevy_rapier2d = "*"
-bevy_rapier2d = { version = "0.27.0", features = [ "simd-stable", "debug-render-2d" ] } #for debug-render
+bevy_rapier2d = "0.27.0"
+#bevy_rapier2d = { version = "0.27.0", features = [ "simd-stable", "debug-render-2d" ] } #for debug-render
 bevy_kira_audio = "0.20.0"
-
+wasm = "0.0"
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]
