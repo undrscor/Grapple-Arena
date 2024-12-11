@@ -2,6 +2,7 @@
 A 2D movement-based platformer game with advancing mechanics that allow the player to traverse the levels to find artifacts.
 The game is built using rust on bevy game engine, using the bevy_ecs_ldtk plugin and bevy_rapier2d for physics, with a dedicated soundtrack and pixelated artstyle.
 
+Itch.io link: https://undrscor.itch.io/path-of-artifacts
 ---------------------------------------------------------------------------------------
 Asset Credentials
 ---------------------------------------------------------------------------------------
