@@ -312,4 +312,3 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, (check_fall_death,player_input, player_movement.after(player_input), update_player_animation.after(player_movement), camera_follow_system,));
     }
 }
-
